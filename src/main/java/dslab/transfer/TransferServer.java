@@ -88,7 +88,7 @@ public class TransferServer implements ITransferServer, Runnable, BasicServer, M
                 c.shutdown();
             }
         }
-        this.shell.out().printf("%s> Server stoped!%n", this.componentId);
+        this.shell.out().printf("%s> Server stopped!%n", this.componentId);
 
         this.delivery.shutdown();
 
@@ -147,12 +147,12 @@ public class TransferServer implements ITransferServer, Runnable, BasicServer, M
     }
 
     @Override
-    public String lookup(String domian) {
-        return this.dns.getString(domian);
+    public String lookup(String domain) {
+        return this.dns.getString(domain);
     }
 
     @Override
-    public String getLoacalAddress() {
+    public String getLocalAddress() {
         return this.dmtpserver.getLocalAddress();
     }
 

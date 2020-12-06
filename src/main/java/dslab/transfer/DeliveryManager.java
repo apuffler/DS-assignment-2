@@ -36,7 +36,7 @@ public class DeliveryManager{
         try {
             socket = new DatagramSocket();
 
-            String send = this.service.getLoacalAddress() + " " + sender;
+            String send = this.service.getLocalAddress() + " " + sender;
             byte[] buffer = send.getBytes();
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(this.statistic_address), this.statistic_port);
             socket.send(packet);

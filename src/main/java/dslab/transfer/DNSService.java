@@ -2,9 +2,9 @@ package dslab.transfer;
 
 public interface DNSService {
 
-    String lookup(String domian);
+    String lookup(String domain);
 
-    String getLoacalAddress();
+    String getLocalAddress();
 
     String getName();
 }
