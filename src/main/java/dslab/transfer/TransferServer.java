@@ -148,7 +148,15 @@ public class TransferServer implements ITransferServer, Runnable, BasicServer, M
 
     @Override
     public String lookup(String domain) {
-        return this.dns.getString(domain);
+        if (this.dns.containsKey(domain))
+        {
+            return this.dns.getString(domain);
+        }
+        else
+        {
+            return null;
+        }
+
     }
 
     @Override
