@@ -225,4 +225,54 @@ public class BigTest1 extends TestBase {
 
     }
 
+    //Testing delivering mail to unknown domains and resulting error mails
+    @Test(timeout = 15000)
+    public void bigTest3() throws Exception {
+        try (JunitSocketClient client = new JunitSocketClient(t1p, err)) {
+            client.verify("ok DMTP");
+            client.sendAndVerify("begin", "ok");
+            client.sendAndVerify("from trillian@earth.planet", "ok");
+            client.sendAndVerify("to somebody@unknowndomain.com", "ok 1");
+            client.sendAndVerify("subject test1", "ok");
+            client.sendAndVerify("data test data", "ok");
+            client.sendAndVerify("send", "ok");
+            client.sendAndVerify("quit","ok bye");
+        }
+
+        try (JunitSocketClient client = new JunitSocketClient(t2p, err)) {
+            client.verify("ok DMTP");
+            client.sendAndVerify("begin", "ok");
+            client.sendAndVerify("from arthur@earth.planet", "ok");
+            client.sendAndVerify("to somebody@unknowndomain.com", "ok 1");
+            client.sendAndVerify("subject test2", "ok");
+            client.sendAndVerify("data test data", "ok");
+            client.sendAndVerify("send", "ok");
+            client.sendAndVerify("quit","ok bye");
+        }
+
+        Thread.sleep(2500);
+
+        try (JunitSocketClient client = new JunitSocketClient(mb_ap, err)) {
+            client.verify("ok DMAP");
+            client.sendAndVerify("login trillian 12345", "ok");
+
+            client.send("list");
+            String listResult = client.listen();
+            err.checkThat(listResult, containsString("mailer@127.0.1.1 ERROR Domain"));
+            client.sendAndVerify("logout", "ok");
+
+
+            client.sendAndVerify("login arthur 23456", "ok");
+            client.send("list");
+            listResult = client.listen();
+            err.checkThat(listResult, containsString("mailer@127.0.1.1 ERROR Domain"));
+            client.sendAndVerify("logout", "ok");
+
+            client.sendAndVerify("quit", "ok bye");
+
+        }
+
+    }
+
+
 }
