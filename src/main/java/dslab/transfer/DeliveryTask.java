@@ -64,7 +64,8 @@ public class DeliveryTask implements Runnable{
                     line = command(cmd,in,out);
                     if(checkError(line)){
                         if(cmd.startsWith("to")){
-                            String from = "mailer@" + this.service.getLocalAddress();
+                            String localAddress = this.service.getLocalAddress().split(":")[0];
+                            String from = "mailer@" + localAddress;
                             if(!this.message.getFrom().equals(from)) {
                                 String data = line.substring(line.toLowerCase().indexOf("error") + 5);
                                 Message m = new DMessage(from, this.message.getFrom(), "ERROR Delivery", data);
@@ -134,7 +135,8 @@ public class DeliveryTask implements Runnable{
         if(!"".equals(nfound)){
             Message m = this.message.clone();
             m.setTo(this.message.getFrom());
-            String returnAddress = "mailer@" + this.service.getLocalAddress();
+            String localAddress = this.service.getLocalAddress().split(":")[0];
+            String returnAddress = "mailer@" + localAddress;
             m.setFrom(returnAddress);
             m.setData("ERROR Domain not found: " + nfound.substring(1));
             m.setSubject("ERROR Domain not found");
