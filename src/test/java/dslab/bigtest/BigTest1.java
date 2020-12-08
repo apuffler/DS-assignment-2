@@ -194,7 +194,7 @@ public class BigTest1 extends TestBase {
             client.send("list");
             String listResult = client.listen();
             err.checkThat(listResult, containsString("arthur@earth.planet test2"));
-            err.checkThat(listResult, containsString("delivery@transfer-1.service ERROR Delivery"));
+            err.checkThat(listResult, containsString("mailer@127.0.1.1 ERROR Delivery"));
 
             client.sendAndVerify("logout", "ok");
 
