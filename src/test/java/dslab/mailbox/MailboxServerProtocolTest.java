@@ -63,8 +63,9 @@ public class MailboxServerProtocolTest extends TestBase {
         }
     }
 
-    @Test(timeout = 25000)
+    @Test(timeout = 15000)
     public void acceptDmtpMessage_listDmapMessage() throws Exception {
+
         // accept a message via DMTP (to trillian)
         try (JunitSocketClient client = new JunitSocketClient(dmtpServerPort, err)) {
             client.verify("ok DMTP");
