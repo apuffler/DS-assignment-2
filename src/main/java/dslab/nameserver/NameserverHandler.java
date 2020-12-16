@@ -17,7 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class NameserverHandler implements INameserverRemote, Runnable {
+public class NameserverHandler implements INameserverRemote {
 
     /**
      * Creates a new server instance.
@@ -31,13 +31,13 @@ public class NameserverHandler implements INameserverRemote, Runnable {
     private Config config;
     private InputStream in;
     private PrintStream out;
-    //private Shell shell;
 
     //Store mailbox names and ip addresses + port
-
-    //Store (remote?) references to other known Nameservers
     ConcurrentSkipListMap<String, String> mailBoxMap;
+
+    //Store associated domain and remote references to other known Nameserver remote objects
     ConcurrentSkipListMap<String, INameserverRemote> nameServerMap;
+
     //Store registry (rootserver only)
     private Registry registry = null;
 
@@ -57,7 +57,6 @@ public class NameserverHandler implements INameserverRemote, Runnable {
         this.config = config;
         this.in = in;
         this.out = out;
-        //this.shell = new Shell(this.in,this.out);
 
         this.registryHost = this.config.getString("registry.host");
         this.registryPort = this.config.getInt("registry.port");
@@ -77,16 +76,6 @@ public class NameserverHandler implements INameserverRemote, Runnable {
         return this.domain == null;
     }
 
-    @Override
-    public void run() {
-        //TODO
-        // Setup Shell
-
-        //Other startup stuff
-
-        //run Shell
-
-    }
 
     private ArrayList<String> extractTLD(String domain)
     {
@@ -246,51 +235,12 @@ public class NameserverHandler implements INameserverRemote, Runnable {
 
 
     public void shutdown() {
-        // TODO
-        /*
-        When shutting down the nameserver, do not forget to unexport its remote object using
-        the static method UnicastRemoteObject.unexportObject(Remote obj, boolean force) and, in the
-        case of the root nameserver, also unregister the remote object and close the registry by invoking the
-        before mentioned static unexportObject method and registry reference as parameter. Otherwise the
-        application may not stop.
-        * */
-        /*
         try {
             UnicastRemoteObject.unexportObject(this, true);
         } catch (NoSuchObjectException e) {
             e.printStackTrace();
         }
 
-         */
-
-        try {
-            UnicastRemoteObject.unexportObject(this, true);
-        } catch (NoSuchObjectException e) {
-            e.printStackTrace();
-        }
-
-
-        /*
-        for (String k : this.nameServerMap.keySet())
-        {
-            try {
-                UnicastRemoteObject.unexportObject(this.nameServerMap.get(k), true);
-            } catch (NoSuchObjectException e) {
-                e.printStackTrace();
-            }
-        }
-        */
-
-
     }
-
-
-    /*
-    public static void main(String[] args) throws Exception {
-        INameserver component = ComponentFactory.createNameserver(args[0], System.in, System.out);
-        component.run();
-    }
-
-     */
 
 }
