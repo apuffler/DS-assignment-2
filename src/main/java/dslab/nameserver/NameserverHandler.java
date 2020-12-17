@@ -78,28 +78,7 @@ public class NameserverHandler implements INameserverRemote {
     }
 
 
-    private ArrayList<String> extractTLD(String domain)
-    {
-        //Captures top level domain, seperates from subdomains
-        //group 1: top level domain
-        //group 2: subdomains
-        String pattern = "^(.+)\\.(\\w+)$";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(domain);
-        if(!m.find())
-        {
-            return null;
-        }
-        return new ArrayList<String>(Arrays.asList(m.group(1),m.group(2)));
-    }
-
-    private boolean isAlphanumerical(String s)
-    {
-        String pattern = "^(\\w+)$";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(s);
-        return m.find();
-    }
+    
 
     //TODO HELPER FUNCTION, REMOVE
     public void print(String s)
