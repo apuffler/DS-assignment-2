@@ -1,6 +1,7 @@
 package dslab.nameserver;
 
 import dslab.ComponentFactory;
+import dslab.common.Domain;
 import dslab.util.Config;
 
 import java.io.InputStream;
@@ -123,43 +124,38 @@ public class NameserverHandler implements INameserverRemote {
      */
     public void registerNameserver(String domain, INameserverRemote nameserver) throws RemoteException, AlreadyRegisteredException, InvalidDomainException
     {
+        Domain parsedDomain = new Domain(domain);
         print("registerNameserver called with: domain:" + domain);
         //TODO: Possible refactor with getNameServer
-        //If domain not fully resolved, check domainname for splitting, then forward the registration
-        if(domain.contains("."))
-        {
-            ArrayList<String> splitDomain = extractTLD(domain);
-            if(splitDomain == null)
-            {
-                throw new InvalidDomainException("No valid domain: " + domain);
-            }
-            String tld = splitDomain.get(0);
-            String lowerLevelDomains = splitDomain.get(1);
 
-            //Check if TLD in one of stored references
-            if(this.nameServerMap.containsKey(tld))
+        if(parsedDomain.isFullyResolved())
+        {
+            //If this domain is already registered here, throw exception.
+            if(this.nameServerMap.containsKey(domain))
+            {
+                throw new AlreadyRegisteredException("Domain " + domain + "already registered at" + this.componentId);
+            }
+
+            //Leaf-zone reached, nameserver will be registered here
+            this.nameServerMap.put(domain, nameserver);
+        }
+        else
+        {
+            if(this.nameServerMap.containsKey(parsedDomain.getTLD()))
             {
                 //TODO: What to do when exception (RemoteException, AlreadyRegisteredException, InvalidDomainException)
                 //TODO: gets thrown? (especially RemoteException) retry in a couple milliseconds?
-                this.nameServerMap.get(tld).registerNameserver(lowerLevelDomains,nameserver);
+                //Domain not fully resolved but next nameserver found, forward call
+                this.nameServerMap.get(parsedDomain.getTLD()).registerNameserver(parsedDomain.getSubdomains(),nameserver);
             }
             else
-            {
-                throw new InvalidDomainException("Domain" + domain + "not fully resolved, intermediate nameserver not found");
+            {   //Resolving domain fully impossible, intermediate nameserver not found
+                throw new RemoteException("Domain" + domain + "not fully resolved, intermediate nameserver not found");
             }
         }
 
-        //If Domain fully resolved, check if name is acceptable, then register
-        if (!this.isAlphanumerical(domain))
-        {
-            throw new InvalidDomainException("Domain not alphanumerical: " + domain);
-        }
-        if(this.nameServerMap.containsKey(domain))
-        {
-            throw new AlreadyRegisteredException("Domain " + domain + "already registered at" + this.componentId);
-        }
-        //Leaf-zone reached, domainname alphanumerical, nameserver will be registered here
-        this.nameServerMap.put(domain, nameserver);
+
+
 
     }
 
@@ -192,31 +188,23 @@ public class NameserverHandler implements INameserverRemote {
         //TODO: Remove prints, put in proper logging, refactor with registerNameServer
         print("getNameserver called with: zone:" + zone);
         print("current nameservermap " + this.nameServerMap.keySet().toString());
-        String tld;
-        if(zone.contains(".")) {
-            ArrayList<String> splitDomain = extractTLD(zone);
-            if (splitDomain == null) {
-                throw new RemoteException("No valid domain: " + zone);
+        try {
+            Domain parsedDomain = new Domain(zone);
+
+            //Check if TLD in one of stored references
+            if(this.nameServerMap.containsKey(parsedDomain.getTLD()))
+            {
+                //TODO: What to do when exception (RemoteException, AlreadyRegisteredException, InvalidDomainException)
+                //TODO: gets thrown? (especially RemoteException) retry in a couple milliseconds?
+                return this.nameServerMap.get(parsedDomain.getTLD());
             }
-            tld = splitDomain.get(0);
+            else
+            {
+                throw new RemoteException("Domain" + zone + "not fully resolved, intermediate nameserver not found");
+            }
+        } catch (InvalidDomainException e) {
+            throw new RemoteException(e.toString());
         }
-        else
-        {
-            tld = zone;
-        }
-
-        //Check if TLD in one of stored references
-        if(this.nameServerMap.containsKey(tld))
-        {
-            //TODO: What to do when exception (RemoteException, AlreadyRegisteredException, InvalidDomainException)
-            //TODO: gets thrown? (especially RemoteException) retry in a couple milliseconds?
-            return this.nameServerMap.get(tld);
-        }
-        else
-        {
-            throw new RemoteException("Domain" + zone + "not fully resolved, intermediate nameserver not found");
-        }
-
     }
 
 
