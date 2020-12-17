@@ -7,70 +7,66 @@ import java.util.regex.Pattern;
 
 public class Domain {
 
-    private String domainString;
+    private String domain;
     private String tld;
     private String subdomains;
 
-    public Domain(String domainString) throws InvalidDomainException {
-        this.domainString = domainString;
+    public Domain(String domain) throws InvalidDomainException {
+        this.domain = domain;
         this.tld = null;
         this.subdomains = null;
         this.categorizeDomain();
     }
 
     public String getTLD(){return this.tld;}
-    public String getDomain(){return this.domainString;}
+    public String getDomain(){return this.domain;}
     public String getSubdomains(){return this.subdomains;}
 
     public boolean isFullyResolved()
     {
-        return !this.domainString.contains(".");
+        return !this.domain.contains(".");
     }
 
-    public boolean isAlphanumerical()
+    private boolean isAlphanumerical(String s)
     {
         String pattern = "^(\\w+)$";
         Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(this.domainString);
+        Matcher m = r.matcher(s);
         return m.find();
     }
 
-    /*
+
     private boolean isValid()
     {
-        return (!this.isAlphanumerical() && !this.isFullyResolved()) || (this.isAlphanumerical() && this.isFullyResolved());
+        return this.isAlphanumerical(this.domain.replace(".",""));
     }
-    
-     */
+
 
     private void categorizeDomain() throws InvalidDomainException
     {
-        //Fully resolved but domainname itself is not alphanumerical, therefore not valid.
-        if(!this.isAlphanumerical() && this.isFullyResolved())
+        if(!this.isValid())
         {
-            throw new InvalidDomainException("Not a valid domain: " + this.domainString);
+            throw new InvalidDomainException("Not a valid domain: " + this.domain);
         }
 
-        //Fully resolved and valid
-        if (this.isAlphanumerical() && this.isFullyResolved())
+        if (this.isFullyResolved())
         {
-            this.tld = "";
+            //Resolved domain
+            this.tld = this.domain;
             this.subdomains = "";
-            return;
         }
+        else {
+            //Unresolved domain
+            String pattern = "^(.+)\\.(\\w+)$";
+            Pattern r = Pattern.compile(pattern);
+            Matcher m = r.matcher(this.domain);
+            if (!m.find()) {
+                throw new InvalidDomainException("Not a valid domain: " + this.domain);
+            }
 
-        //Unresolved
-        String pattern = "^(.+)\\.(\\w+)$";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(this.domainString);
-        if(!m.find())
-        {
-            throw new InvalidDomainException("Not a valid domain: " + this.domainString);
+            this.tld = m.group(1);
+            this.subdomains = m.group(2);
         }
-
-        this.tld = m.group(1);
-        this.subdomains = m.group(2);
-
     }
 
 
