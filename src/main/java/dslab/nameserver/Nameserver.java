@@ -105,19 +105,7 @@ public class Nameserver implements INameserver{
     private void  createAndPopulateRegistry()
     {
 
-            try {
 
-                this.registry = LocateRegistry.createRegistry(this.registryPort);
-
-                int randomPort = 0;
-                //instantiate handler and export, then bind+
-                INameserverRemote remoteHandler = (INameserverRemote) UnicastRemoteObject.exportObject(this.handler, randomPort);
-                //TODO Check: bind "this.handler" or remoteHandler?
-                this.registry.bind(this.rootNameserverBindingName, this.handler);
-
-            } catch (RemoteException | AlreadyBoundException e) {
-                e.printStackTrace();
-            }
     }
 
 
@@ -137,12 +125,23 @@ public class Nameserver implements INameserver{
         if(isRootNameserver())
         {
             //IS ROOTSERVER
-            createAndPopulateRegistry();
+            //Create registry, export root NameserverHandler, bind root NameserverHandler in registry
+            try {
+                this.registry = LocateRegistry.createRegistry(this.registryPort);
+                int randomPort = 0;
+                //instantiate handler and export, then bind+
+                INameserverRemote remoteHandler = (INameserverRemote) UnicastRemoteObject.exportObject(this.handler, randomPort);
+                //TODO Check: bind "this.handler" or remoteHandler?
+                this.registry.bind(this.rootNameserverBindingName, this.handler);
+
+            } catch (RemoteException | AlreadyBoundException e) {
+                e.printStackTrace();
+            }
         }
         else
         {
             //IS ZONESERVER
-
+            //Export zone NameserverHandler, lookup root NameserverHandler, register Nameserver 
             try {
                 int randomPort = 0;
                 //instantiate handler and export, then bind+
