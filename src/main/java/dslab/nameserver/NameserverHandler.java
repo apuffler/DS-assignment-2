@@ -78,7 +78,7 @@ public class NameserverHandler implements INameserverRemote {
     }
 
 
-    
+
 
     //TODO HELPER FUNCTION, REMOVE
     public void print(String s)
@@ -103,6 +103,7 @@ public class NameserverHandler implements INameserverRemote {
      */
     public void registerNameserver(String domain, INameserverRemote nameserver) throws RemoteException, AlreadyRegisteredException, InvalidDomainException
     {
+        print("registering " + domain + " @ " + this.domain);
         Domain parsedDomain = new Domain(domain);
         print("registerNameserver called with: domain:" + domain);
         //TODO: Possible refactor with getNameServer
@@ -116,7 +117,7 @@ public class NameserverHandler implements INameserverRemote {
             }
 
             //Leaf-zone reached, nameserver will be registered here
-            this.nameServerMap.put(domain, nameserver);
+            this.nameServerMap.put(parsedDomain.getDomain(), nameserver);
         }
         else
         {
@@ -133,9 +134,6 @@ public class NameserverHandler implements INameserverRemote {
             }
         }
 
-
-
-
     }
 
     /**
@@ -150,7 +148,30 @@ public class NameserverHandler implements INameserverRemote {
      */
     public void registerMailboxServer(String domain, String address) throws RemoteException, AlreadyRegisteredException, InvalidDomainException
     {
-        //TODO
+        print("registering mailbox" + domain + " @ " + this.domain);
+        Domain parsedDomain = new Domain(domain);
+        if(parsedDomain.isFullyResolved())
+        {
+            //If this domain is already registered here, throw exception.
+            if(this.mailBoxMap.containsKey(address))
+            {
+                throw new AlreadyRegisteredException("Mailbox " + address + "already registered at" + this.componentId);
+            }
+
+            //Leaf-zone reached, nameserver will be registered here
+            this.mailBoxMap.put(parsedDomain.getDomain(), address);
+        }
+        else
+        {
+            if(this.nameServerMap.containsKey(parsedDomain.getTLD()))
+            {
+                this.nameServerMap.get(parsedDomain.getTLD()).registerMailboxServer(parsedDomain.getSubdomains(), address);
+            }
+            else
+            {   //Resolving domain fully impossible, intermediate nameserver not found
+                throw new RemoteException("Domain" + domain + "not fully resolved, intermediate nameserver not found");
+            }
+        }
     }
 
     /**
