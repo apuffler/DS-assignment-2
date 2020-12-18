@@ -64,8 +64,9 @@ public class Domain {
                 throw new InvalidDomainException("Not a valid domain: " + this.domain);
             }
 
-            this.tld = m.group(1);
-            this.subdomains = m.group(2);
+            this.tld = m.group(2);
+            this.subdomains = m.group(1);
+
         }
     }
 
