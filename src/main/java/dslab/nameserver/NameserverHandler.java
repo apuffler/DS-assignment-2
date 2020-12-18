@@ -105,8 +105,6 @@ public class NameserverHandler implements INameserverRemote {
      */
     public void registerNameserver(String domain, INameserverRemote nameserver) throws RemoteException, AlreadyRegisteredException, InvalidDomainException
     {
-
-
         Domain parsedDomain = new Domain(domain);
         if(parsedDomain.isFullyResolved())
         {
@@ -135,7 +133,6 @@ public class NameserverHandler implements INameserverRemote {
                 throw new RemoteException("Domain" + domain + "not fully resolved, intermediate nameserver not found");
             }
         }
-
     }
 
     /**
@@ -161,7 +158,7 @@ public class NameserverHandler implements INameserverRemote {
 
                 //Leaf-zone reached, nameserver will be registered here
                 this.mailBoxMap.put(parsedDomain.getDomain(), address);
-                this.log("Registering mailboxserver for zone " + parsedDomain.getDomain());
+                this.log("Registering mailboxserver for zone"  + parsedDomain.getDomain());
             }
         }
         else

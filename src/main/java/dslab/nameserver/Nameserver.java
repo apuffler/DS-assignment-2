@@ -17,6 +17,8 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
@@ -45,14 +47,10 @@ public class Nameserver implements INameserver{
 
     //Store mailbox domain and ip addresses + port
     // Mailbox name (e.g vienna) , DMTP Socket address of mailbox server (127.0.0.1:16503)
-    //TODO Add alphabetical comparator to sort mailBoxMap
     ConcurrentSkipListMap<String, String> mailBoxMap = new ConcurrentSkipListMap<String, String>(String.CASE_INSENSITIVE_ORDER);
     //Store (remote?) references to other known Nameservers
     // Domain name (e.g. 'planet' or 'earth.planet'), Remote Object of Nameserver
     ConcurrentSkipListMap<String, INameserverRemote> nameServerMap = new ConcurrentSkipListMap<>(String.CASE_INSENSITIVE_ORDER);
-
-    //private final int NUM_THREADS = 10;
-    //private ExecutorService NameserverHandlerPool = Executors.newFixedThreadPool(NUM_THREADS);
 
     //Nameserver Handler
     private NameserverHandler handler;
@@ -101,35 +99,28 @@ public class Nameserver implements INameserver{
     }
 
 
-    //Needs to be called after this.handler has been instantiated
-    private void  createAndPopulateRegistry()
-    {
-
-
-    }
-
-
 
     @Override
     public void run() {
-        //TODO
-        // Setup Shell
         this.shell.setPrompt(this.componentId + "> ");
         this.shell.register(this);
 
         this.handler = new NameserverHandler(this.componentId, this.config, this.shell,
                 this.mailBoxMap,
                 this.nameServerMap);
-        //this.handler.run();
-        //Other startup stuff
+
+
         if(isRootNameserver())
         {
             //IS ROOTSERVER
             //Create registry, export root NameserverHandler, bind root NameserverHandler in registry
+            this.log("Starting up root nameserver");
             try {
+
                 this.registry = LocateRegistry.createRegistry(this.registryPort);
+
+                //instantiate handler and export, then bind
                 int randomPort = 0;
-                //instantiate handler and export, then bind+
                 INameserverRemote remoteHandler = (INameserverRemote) UnicastRemoteObject.exportObject(this.handler, randomPort);
                 //TODO Check: bind "this.handler" or remoteHandler?
                 this.registry.bind(this.rootNameserverBindingName, this.handler);
@@ -141,7 +132,8 @@ public class Nameserver implements INameserver{
         else
         {
             //IS ZONESERVER
-            //Export zone NameserverHandler, lookup root NameserverHandler, register Nameserver 
+            //Export zone NameserverHandler, lookup root NameserverHandler, register Nameserver
+            this.log("Starting up zone nameserver: " + this.domain);
             try {
                 int randomPort = 0;
                 //instantiate handler and export, then bind+
@@ -156,9 +148,19 @@ public class Nameserver implements INameserver{
             }
         }
 
-
         //run Shell
         this.shell.run();
+    }
+
+    public void log(String s)
+    {
+        LocalTime time = LocalTime.now();
+        String timeColonPattern = "HH:mm:ss";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeColonPattern);
+        String formattedTime = time.format(formatter);
+        String logline = "%s : %s";
+        this.shell.out().println(String.format(logline, formattedTime, s));
+        this.shell.out().flush();
     }
 
     private void printEnumeratedStrings(SortedSet<String> stringSet)
@@ -183,45 +185,13 @@ public class Nameserver implements INameserver{
         this.printEnumeratedStrings(this.mailBoxMap.descendingKeySet());
     }
 
-    /*
-    private void shutdownAndAwaitTermination(ExecutorService pool) {
-        pool.shutdown(); // Disable new tasks from being submitted
-        try {
-            // Wait a while for existing tasks to terminate
-            if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
-                pool.shutdownNow(); // Cancel currently executing tasks
-                // Wait a while for tasks to respond to being cancelled
-                if (!pool.awaitTermination(60, TimeUnit.SECONDS))
-                    System.err.println("Pool did not terminate");
-            }
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            pool.shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
-    }
-    */
 
     @Command
     @Override
     public void shutdown() {
-        this.shell.out().printf("%s>Nameserver stopping...%n", this.componentId);
-        /*
-        When shutting down the nameserver, do not forget to unexport its remote object using
-        the static method UnicastRemoteObject.unexportObject(Remote obj, boolean force) and, in the
-        case of the root nameserver, also unregister the remote object and close the registry by invoking the
-        before mentioned static unexportObject method and registry reference as parameter. Otherwise the
-        application may not stop.
-        * */
-        /*
-        try {
-            UnicastRemoteObject.unexportObject(this.handler, true);
-        } catch (NoSuchObjectException e) {
-            e.printStackTrace();
-        }
 
-         */
+        this.log("Shutting down nameserver: " + (this.isRootNameserver() ? "root" : this.domain));
+
         //Shutdown handler (it unregisters itself)
         this.handler.shutdown();
 
@@ -234,9 +204,7 @@ public class Nameserver implements INameserver{
             }
         }
 
-
-
-        this.shell.out().printf("%s>Nameserver stopped!%n", this.componentId);
+        this.log("Nameserver stopped.");
         //Shell beenden
         throw new StopShellException();
     }
