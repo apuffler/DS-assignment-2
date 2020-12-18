@@ -1,5 +1,6 @@
 package dslab.nameserver;
 
+import at.ac.tuwien.dsg.orvell.Shell;
 import dslab.ComponentFactory;
 import dslab.common.Domain;
 import dslab.util.Config;
@@ -10,6 +11,8 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -30,8 +33,7 @@ public class NameserverHandler implements INameserverRemote {
      */
     private String componentId;
     private Config config;
-    private InputStream in;
-    private PrintStream out;
+    private Shell shell;
 
     //Store mailbox names and ip addresses + port
     ConcurrentSkipListMap<String, String> mailBoxMap;
@@ -49,15 +51,14 @@ public class NameserverHandler implements INameserverRemote {
     //Root Nameserver: domain == null, zone nameserver: domain != null
     private String domain = null;
 
-    public NameserverHandler(String componentId, Config config, InputStream in, PrintStream out,
+    public NameserverHandler(String componentId, Config config, Shell shell,
                              ConcurrentSkipListMap<String, String> mailBoxMap,
                              ConcurrentSkipListMap<String, INameserverRemote> nameServerMap) {
         this.mailBoxMap = mailBoxMap;
         this.nameServerMap = nameServerMap;
         this.componentId = componentId;
         this.config = config;
-        this.in = in;
-        this.out = out;
+        this.shell = shell;
 
         this.registryHost = this.config.getString("registry.host");
         this.registryPort = this.config.getInt("registry.port");
@@ -71,21 +72,22 @@ public class NameserverHandler implements INameserverRemote {
 
     }
 
-
-
     private boolean isRootNameserver() {
         return this.domain == null;
     }
 
-
-
-
-    //TODO HELPER FUNCTION, REMOVE
-    public void print(String s)
+    public void log(String s)
     {
-        System.out.println(this.componentId + "-handler: " + s);
-        System.out.flush();
+        LocalTime time = LocalTime.now();
+        String timeColonPattern = "HH:mm:ss";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeColonPattern);
+        String formattedTime = time.format(formatter);
+        String logline = "%s : %s";
+        this.shell.out().println(String.format(logline, formattedTime, s));
+        this.shell.out().flush();
     }
+
+
 
     /**
      * Registers a mailbox server with the given address for the given domain. For example, when registering a
@@ -103,21 +105,21 @@ public class NameserverHandler implements INameserverRemote {
      */
     public void registerNameserver(String domain, INameserverRemote nameserver) throws RemoteException, AlreadyRegisteredException, InvalidDomainException
     {
-        print("registering " + domain + " @ " + this.domain);
-        Domain parsedDomain = new Domain(domain);
-        print("registerNameserver called with: domain:" + domain);
-        //TODO: Possible refactor with getNameServer
 
+
+        Domain parsedDomain = new Domain(domain);
         if(parsedDomain.isFullyResolved())
         {
-            //If this domain is already registered here, throw exception.
-            if(this.nameServerMap.containsKey(domain))
-            {
-                throw new AlreadyRegisteredException("Domain " + domain + "already registered at" + this.componentId);
-            }
+            synchronized (this.nameServerMap) {
+                //If this domain is already registered here, throw exception.
+                if (this.nameServerMap.containsKey(domain)) {
+                    throw new AlreadyRegisteredException("Domain " + domain + "already registered at" + this.componentId);
+                }
 
-            //Leaf-zone reached, nameserver will be registered here
-            this.nameServerMap.put(parsedDomain.getDomain(), nameserver);
+                //Leaf-zone reached, nameserver will be registered here
+                this.nameServerMap.put(parsedDomain.getDomain(), nameserver);
+                this.log("Registering nameserver for zone " + parsedDomain.getDomain());
+            }
         }
         else
         {
@@ -148,18 +150,19 @@ public class NameserverHandler implements INameserverRemote {
      */
     public void registerMailboxServer(String domain, String address) throws RemoteException, AlreadyRegisteredException, InvalidDomainException
     {
-        print("registering mailbox" + domain + " @ " + this.domain);
         Domain parsedDomain = new Domain(domain);
         if(parsedDomain.isFullyResolved())
         {
-            //If this domain is already registered here, throw exception.
-            if(this.mailBoxMap.containsKey(address))
-            {
-                throw new AlreadyRegisteredException("Mailbox " + address + "already registered at" + this.componentId);
-            }
+            synchronized (this.mailBoxMap) {
+                //If this domain is already registered here, throw exception.
+                if (this.mailBoxMap.containsKey(address)) {
+                    throw new AlreadyRegisteredException("Mailbox " + address + "already registered at" + this.componentId);
+                }
 
-            //Leaf-zone reached, nameserver will be registered here
-            this.mailBoxMap.put(parsedDomain.getDomain(), address);
+                //Leaf-zone reached, nameserver will be registered here
+                this.mailBoxMap.put(parsedDomain.getDomain(), address);
+                this.log("Registering mailboxserver for zone " + parsedDomain.getDomain());
+            }
         }
         else
         {
@@ -185,17 +188,13 @@ public class NameserverHandler implements INameserverRemote {
      */
     public INameserverRemote getNameserver(String zone) throws RemoteException
     {
-        //TODO: Remove prints, put in proper logging, refactor with registerNameServer
-        print("getNameserver called with: zone:" + zone);
-        print("current nameservermap " + this.nameServerMap.keySet().toString());
+        this.log("Nameserver for " + zone + " requested");
         try {
             Domain parsedDomain = new Domain(zone);
 
             //Check if TLD in one of stored references
             if(this.nameServerMap.containsKey(parsedDomain.getTLD()))
             {
-                //TODO: What to do when exception (RemoteException, AlreadyRegisteredException, InvalidDomainException)
-                //TODO: gets thrown? (especially RemoteException) retry in a couple milliseconds?
                 return this.nameServerMap.get(parsedDomain.getTLD());
             }
             else
@@ -210,6 +209,7 @@ public class NameserverHandler implements INameserverRemote {
 
     public String lookup(String username) throws RemoteException
     {
+        this.log("Looking up " + username + " at nameserver " + this.domain);
         if (this.mailBoxMap.containsKey(username))
         {
             //Returns IP and port of mailbox
@@ -224,6 +224,7 @@ public class NameserverHandler implements INameserverRemote {
 
     public void shutdown() {
         try {
+            this.log("NameserverHandler" + this.componentId + " shutting down!");
             UnicastRemoteObject.unexportObject(this, true);
         } catch (NoSuchObjectException e) {
             e.printStackTrace();

@@ -104,12 +104,6 @@ public class Nameserver implements INameserver{
     //Needs to be called after this.handler has been instantiated
     private void  createAndPopulateRegistry()
     {
-        /*
-        if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new SecurityManager());
-        }
-
-         */
 
             try {
 
@@ -135,8 +129,7 @@ public class Nameserver implements INameserver{
         this.shell.setPrompt(this.componentId + "> ");
         this.shell.register(this);
 
-
-        this.handler = new NameserverHandler(this.componentId, this.config, this.in, this.out,
+        this.handler = new NameserverHandler(this.componentId, this.config, this.shell,
                 this.mailBoxMap,
                 this.nameServerMap);
         //this.handler.run();
@@ -164,27 +157,7 @@ public class Nameserver implements INameserver{
             }
         }
 
-        /* ==== This is temporary networking and accepting to be able to debug === */
-        /* ==== TODO: Remove and integrate networking with rest of code === */
 
-        //pool.execute(new NameserverHandler());
-        //run Shell
-
-        /*
-        while (true)
-        {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        */
-
-
-        /* ==== ============================================================== === */
-
-        //TODO: UNCOMMENT
         //run Shell
         this.shell.run();
     }
