@@ -94,6 +94,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             for(Message m : messages){
                 this.out().printf("S> %d %s %s%n", m.getID(),m.getFrom(), m.getSubject());
             }
+            this.out().println("S> ok");
         }catch(ProtocolException e){
             this.out().println("S> " + e.getMessage());
         }
@@ -111,6 +112,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             this.out().printf("S> to %s%n",m.getTo());
             this.out().printf("S> subject %s%n",m.getSubject());
             this.out().printf("S> data %s%n",m.getData());
+            this.out().println("S> ok");
         }catch(ProtocolException e){
             this.out().printf("S> %s%n" , e.getMessage());
         }
@@ -124,6 +126,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         }
         try{
             this.protocol.delete(this.username, msgid);
+            this.out().println("S> ok");
         }catch(ProtocolException e){
             this.out().println("S> " + e.getMessage());
         }
