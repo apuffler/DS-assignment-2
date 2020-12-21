@@ -2,6 +2,8 @@ package dslab.common;
 
 import dslab.nameserver.InvalidDomainException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +43,10 @@ public class Domain {
         return this.isAlphanumerical(this.domain.replace(".",""));
     }
 
+    public ArrayList<String> splitDomain()
+    {
+        return (ArrayList<String>) Arrays.asList(this.domain.split("."));
+    }
 
     private void categorizeDomain() throws InvalidDomainException
     {
