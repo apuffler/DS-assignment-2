@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +20,9 @@ import dslab.basic.BasicServer;
 import dslab.basic.Email;
 import dslab.basic.TCPServer;
 import dslab.basic.ThreadedCommunication;
+import dslab.common.Domain;
+import dslab.nameserver.INameserverRemote;
+import dslab.nameserver.InvalidDomainException;
 import dslab.protocols.Message;
 import dslab.protocols.ProtocolException;
 import dslab.protocols.dmtp.DMTPClient;
@@ -147,16 +154,51 @@ public class TransferServer implements ITransferServer, Runnable, BasicServer, M
     }
 
     @Override
-    public String lookup(String domain) {
-        if (this.dns.containsKey(domain))
-        {
-            return this.dns.getString(domain);
-        }
-        else
-        {
+    public String lookup(String domain)  {
+        try {
+            Domain parsedDomain = new Domain(domain);
+
+            String registryHost = this.config.getString("registry.host");
+            Integer registryPort = this.config.getInt("registry.port");
+            String rootNameserverId = this.config.getString("root_id");
+
+            //Get registry, from registry rootNS
+            Registry registry = LocateRegistry.getRegistry(registryHost, registryPort);
+            INameserverRemote rootNameserver = (INameserverRemote) registry.lookup(rootNameserverId);
+
+            //Reversing zonesToLookup to iterate from highermost domain to lowermost
+            ArrayList<String> zonesToLookup = parsedDomain.splitDomain();
+            Collections.reverse(zonesToLookup);
+
+            //Extract first zone
+            String firstZone = new String(zonesToLookup.get(0));
+            zonesToLookup.remove(0);
+
+            //Extract last zone
+            String lastZone = new String(zonesToLookup.get(zonesToLookup.size() - 1));
+            zonesToLookup.remove(zonesToLookup.size() - 1);
+
+            //Getting first ns from zone
+            INameserverRemote currentNS = rootNameserver.getNameserver(firstZone);
+
+            //Iterating through zones and corresponding Nameservers
+            for (String zone : zonesToLookup)
+            {
+                currentNS = currentNS.getNameserver(zone);
+            }
+
+            //Looking up last zone (which is mailbox zone)
+            return currentNS.lookup(lastZone);
+
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
             return null;
         }
-
+        catch (InvalidDomainException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
