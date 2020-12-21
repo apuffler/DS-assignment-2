@@ -19,10 +19,12 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -182,7 +184,12 @@ public class Nameserver implements INameserver{
     @Command
     @Override
     public void addresses() {
-        this.printEnumeratedStrings(this.mailBoxMap.descendingKeySet());
+        ArrayList<String> domainAddressList = new ArrayList<String>();
+        for(String domain : this.mailBoxMap.descendingKeySet())
+        {
+            domainAddressList.add(domain + " " + this.mailBoxMap.get(domain));
+        }
+        this.printEnumeratedStrings(new ConcurrentSkipListSet(domainAddressList));
     }
 
 
