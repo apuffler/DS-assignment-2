@@ -7,5 +7,6 @@ public interface BasicServer extends Runnable{
 
     void addClient(String name,Socket socket);
     void removeClient(ThreadedCommunication socket);
+    String getName();
     PrintStream console();
 }

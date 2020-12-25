@@ -5,7 +5,7 @@ import java.net.Socket;
 
 public class TCPClient implements ThreadedCommunication{
     private Socket socket;
-    private BasicServer server;
+    protected BasicServer server;
     private String protocolname;
 
     private Thread thread;

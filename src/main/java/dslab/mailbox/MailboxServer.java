@@ -141,4 +141,8 @@ public class MailboxServer implements IMailboxServer, Runnable, BasicServer {
         IMailboxServer server = ComponentFactory.createMailboxServer(args[0], System.in, System.out);
         server.run();
     }
+
+    public String getName() {
+      return name;
+    }
 }

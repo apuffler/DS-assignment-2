@@ -9,4 +9,5 @@ public interface MessageAccessProtocol {
     void delete(int msgid);
     void logout();
     void quit();
+    void startsecure();
 }
