@@ -29,6 +29,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
     private boolean handshakeInProgress = false;
     private int handshakeStage = 0;
     private PrivateKey privateKey;
+    private String keyFileName;
     private Cipher cipher;
 
 
@@ -36,6 +37,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         super(socket, server, protocolname);
         this.protocol = protocol;
         this.username = null;
+        this.keyFileName = "mailbox-" + this.server.getName().replace(".","-");
     }
 
     @Override
@@ -170,28 +172,22 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
 
     @Override
     public void startsecure() {
-        String componentID = this.server.getName();
         this.establishPrivateKey();
         this.establishCipher();
-        this.out().println("S> ok " + componentID);
+        this.out().println("S> ok " + this.keyFileName);
         this.handshakeInProgress = true;
         this.handshakeStage = 1;
     }
 
     private void establishPrivateKey(){
         try {
-            byte[] pk = this.getPrivateKey();
+            byte[] pk = Files.readAllBytes(Paths.get(("keys/server/" + this.keyFileName +".der")));
             PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(pk);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA/ECB/PKCS1Padding");
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             this.privateKey = keyFactory.generatePrivate(spec);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             this.shutdown();
         }
-    }
-
-    private byte[] getPrivateKey() throws IOException {
-        String name = this.server.getName();
-        return Files.readAllBytes(Paths.get(("keys/server/" + name + ".der"));
     }
 
     private void establishCipher() {
