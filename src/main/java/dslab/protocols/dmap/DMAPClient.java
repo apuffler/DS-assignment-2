@@ -118,7 +118,12 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             for (Message m : messages) {
                 this.out().printf("S> %d %s %s%n", m.getID(), m.getFrom(), m.getSubject());
             }
+<<<<<<< HEAD
         } catch (ProtocolException e) {
+=======
+            this.out().println("S> ok");
+        }catch(ProtocolException e){
+>>>>>>> origin/dominik-client
             this.out().println("S> " + e.getMessage());
         }
     }
@@ -129,6 +134,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             this.out().println("S> error not logged in");
             return;
         }
+<<<<<<< HEAD
         try {
             Message m = this.protocol.show(this.username, msgid);
             this.out().printf("S> from %s%n", m.getFrom());
@@ -137,6 +143,17 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             this.out().printf("S> data %s%n", m.getData());
         } catch (ProtocolException e) {
             this.out().printf("S> %s%n", e.getMessage());
+=======
+        try{
+            Message m = this.protocol.show(this.username,msgid);
+            this.out().printf("S> from %s%n",m.getFrom());
+            this.out().printf("S> to %s%n",m.getTo());
+            this.out().printf("S> subject %s%n",m.getSubject());
+            this.out().printf("S> data %s%n",m.getData());
+            this.out().println("S> ok");
+        }catch(ProtocolException e){
+            this.out().printf("S> %s%n" , e.getMessage());
+>>>>>>> origin/dominik-client
         }
     }
 
@@ -148,7 +165,12 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         }
         try {
             this.protocol.delete(this.username, msgid);
+<<<<<<< HEAD
         } catch (ProtocolException e) {
+=======
+            this.out().println("S> ok");
+        }catch(ProtocolException e){
+>>>>>>> origin/dominik-client
             this.out().println("S> " + e.getMessage());
         }
     }
