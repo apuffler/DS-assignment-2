@@ -19,6 +19,9 @@ public interface Message {
     String getData();
     void setData(String data);
 
+    String getHash();
+    void setHash(String hash);
+
     Message clone();
     boolean validate();
 

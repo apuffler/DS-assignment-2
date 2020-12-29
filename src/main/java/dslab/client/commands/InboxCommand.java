@@ -34,6 +34,10 @@ public class InboxCommand implements Command{
                 this.con.console().println(line);
                 return;
             }
+            if(line.toUpperCase().contains("NO MAILBOX FOUND!")){
+
+                break;
+            }
 
             if("ok".equals(line)){
                 break;
@@ -61,6 +65,7 @@ public class InboxCommand implements Command{
     private void printMessage(Message msg){
         String txt = "id: %s%nsender: %s%nrecipients: %s%nsubject: %s%ndata: %s%n%s%n";
         this.con.console().printf(txt,msg.getID(), msg.getFrom(), msg.getTo(), msg.getSubject(),msg.getData(),"#".repeat(100));
+        this.con.console().printf("HASH: %s%n",msg.getHash());
     }
 
     private Message readMessage(int id){
@@ -95,6 +100,9 @@ public class InboxCommand implements Command{
                     break;
                 case "data":
                     msg.setData(arg);
+                    break;
+                case "hash":
+                    msg.setHash(arg);
                     break;
             }
         }while(true);

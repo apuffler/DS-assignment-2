@@ -9,6 +9,7 @@ public interface MessageTransferProtocol {
     void from(String address);
     void subject(String subject);
     void data(String data);
+    void hash(String hash);
     void send();
     void quit();
 }

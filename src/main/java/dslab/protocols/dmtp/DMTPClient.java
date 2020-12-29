@@ -49,6 +49,9 @@ public class DMTPClient extends TCPClient implements MessageTransferProtocol {
             case "data":
                 data(args);
                 break;
+            case "hash":
+                hash(args);
+                break;
             case "send":
                 send();
                 break;
@@ -125,6 +128,17 @@ public class DMTPClient extends TCPClient implements MessageTransferProtocol {
         this.message.setData(data);
         this.ok();
 
+    }
+
+    @Override
+    public void hash(String hash) {
+        if(this.message == null){
+            this.out().println("S> error No Message");
+            return;
+        }
+
+        this.message.setHash(hash);
+        this.ok();
     }
 
     @Override

@@ -112,6 +112,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             this.out().printf("S> to %s%n",m.getTo());
             this.out().printf("S> subject %s%n",m.getSubject());
             this.out().printf("S> data %s%n",m.getData());
+            this.out().printf("S> hash %s%n",m.getHash());
             this.out().println("S> ok");
         }catch(ProtocolException e){
             this.out().printf("S> %s%n" , e.getMessage());

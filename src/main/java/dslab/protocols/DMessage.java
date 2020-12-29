@@ -6,22 +6,23 @@ import java.util.List;
 public class DMessage implements Message {
 
     private Integer id;
-    private String from, to, subject, data;
+    private String from, to, subject, data, hash;
 
     public DMessage(){
-        this(null,null,null,null);
+        this(null,null,null,null, null);
     }
 
     public DMessage(DMessage m){
-        this(m.from, m.to,m.subject,m.data);
+        this(m.from, m.to,m.subject,m.data, m.hash);
     }
 
-    public DMessage(String from, String to, String subject, String data){
+    public DMessage(String from, String to, String subject, String data, String hash){
         this.id = null;
         this.from = from;
         this.to = to;
         this.subject = subject;
         this.data = data;
+        this.hash = hash;
     }
 
     @Override
@@ -77,6 +78,16 @@ public class DMessage implements Message {
     }
 
     @Override
+    public String getHash() {
+        return this.hash;
+    }
+
+    @Override
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    @Override
     public Message clone(){
         return new DMessage(this);
     }
@@ -94,6 +105,7 @@ public class DMessage implements Message {
         list.add("to " + this.getTo());
         list.add("subject " + this.getSubject());
         list.add("data " + this.getData());
+        list.add("hash " + this.getHash());
 
         return list;
     }

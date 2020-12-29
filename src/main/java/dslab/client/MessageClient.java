@@ -1,8 +1,12 @@
 package dslab.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.HashMap;
 
 import at.ac.tuwien.dsg.orvell.Shell;
@@ -16,6 +20,11 @@ import dslab.client.connection.DMTPConnection;
 import dslab.protocols.DMessage;
 import dslab.protocols.Message;
 import dslab.util.Config;
+import dslab.util.Keys;
+
+import javax.crypto.EncryptedPrivateKeyInfo;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 public class MessageClient implements IMessageClient, Runnable, INBOXManager {
     private String componentId;
@@ -96,15 +105,21 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
         this.shell.out().println(to);
         this.shell.out().println(subject);
         this.shell.out().println(data);
-        Message msg = new DMessage(this.config.getString("transfer.email"), to, subject, data);
+        Message msg = new DMessage(this.config.getString("transfer.email"), to, subject, data,null);
+
         try {
+            msg = MessageVerifier.getInstance().generateHash(msg);
             Connection con = new DMTPConnection(this.config.getString("transfer.host"), this.config.getInt("transfer.port"), this.shell.out());
             new MsgCommand(msg).execute(con, this);
             con.stop();
-        } catch (IOException e) {
+        } catch (IOException | InvalidKeyException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
+
+
+
+
 
     @Override
     @Command

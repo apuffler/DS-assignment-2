@@ -68,7 +68,7 @@ public class DeliveryTask implements Runnable{
                             String from = "mailer@" + localAddress;
                             if(!this.message.getFrom().equals(from)) {
                                 String data = line.substring(line.toLowerCase().indexOf("error") + 5);
-                                Message m = new DMessage(from, this.message.getFrom(), "ERROR Delivery", data);
+                                Message m = new DMessage(from, this.message.getFrom(), "ERROR Delivery", data,null);
                                 this.manager.sendMessage(m);
                             }
                         }else{
