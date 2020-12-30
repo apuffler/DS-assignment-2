@@ -1,24 +1,20 @@
 package dslab.nameserver;
 
 import at.ac.tuwien.dsg.orvell.Shell;
-import dslab.ComponentFactory;
+
 import dslab.common.Domain;
+import dslab.common.Log;
 import dslab.util.Config;
 
-import java.io.InputStream;
-import java.io.PrintStream;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public class NameserverHandler implements INameserverRemote {
@@ -31,22 +27,15 @@ public class NameserverHandler implements INameserverRemote {
      * @param in the input stream to read console input from
      * @param out the output stream to write console output to
      */
-    private String componentId;
-    private Config config;
-    private Shell shell;
-
+    private final String componentId;
+    private final Config config;
+    private final Shell shell;
+    private final Log log;
     //Store mailbox names and ip addresses + port
-    ConcurrentSkipListMap<String, String> mailBoxMap;
+    private final ConcurrentSkipListMap<String, String> mailBoxMap;
 
     //Store associated domain and remote references to other known Nameserver remote objects
-    ConcurrentSkipListMap<String, INameserverRemote> nameServerMap;
-
-    //Store registry (rootserver only)
-    private Registry registry = null;
-
-    private String registryHost;
-    private int registryPort;
-    private String rootNameserverBindingName;
+    private final ConcurrentSkipListMap<String, INameserverRemote> nameServerMap;
 
     //Root Nameserver: domain == null, zone nameserver: domain != null
     private String domain = null;
@@ -59,33 +48,20 @@ public class NameserverHandler implements INameserverRemote {
         this.componentId = componentId;
         this.config = config;
         this.shell = shell;
-
-        this.registryHost = this.config.getString("registry.host");
-        this.registryPort = this.config.getInt("registry.port");
+        this.log = new Log(this.shell);
 
         //Load config, determine if root nameserver or zone nameserver
         if (this.config.containsKey("domain")) {
             //Domain to manage - therefore regular Nameserver
             this.domain = this.config.getString("domain");
         }
-        this.rootNameserverBindingName = this.config.getString("root_id");
-
     }
 
     private boolean isRootNameserver() {
         return this.domain == null;
     }
 
-    public void log(String s)
-    {
-        LocalTime time = LocalTime.now();
-        String timeColonPattern = "HH:mm:ss";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeColonPattern);
-        String formattedTime = time.format(formatter);
-        String logline = "%s : %s";
-        this.shell.out().println(String.format(logline, formattedTime, s));
-        this.shell.out().flush();
-    }
+
 
 
 
@@ -116,7 +92,7 @@ public class NameserverHandler implements INameserverRemote {
 
                 //Leaf-zone reached, nameserver will be registered here
                 this.nameServerMap.put(parsedDomain.getDomain(), nameserver);
-                this.log("Registering nameserver for zone " + parsedDomain.getDomain());
+                this.log.log("Registering nameserver for zone " + parsedDomain.getDomain());
             }
         }
         else
@@ -158,7 +134,7 @@ public class NameserverHandler implements INameserverRemote {
 
                 //Leaf-zone reached, nameserver will be registered here
                 this.mailBoxMap.put(parsedDomain.getDomain(), address);
-                this.log("Registering mailboxserver for zone"  + parsedDomain.getDomain());
+                this.log.log("Registering mailboxserver for zone"  + parsedDomain.getDomain());
             }
         }
         else
@@ -185,7 +161,7 @@ public class NameserverHandler implements INameserverRemote {
      */
     public INameserverRemote getNameserver(String zone) throws RemoteException
     {
-        this.log("Nameserver for " + zone + " requested");
+        this.log.log("Nameserver for " + zone + " requested");
         try {
             Domain parsedDomain = new Domain(zone);
 
@@ -206,7 +182,7 @@ public class NameserverHandler implements INameserverRemote {
 
     public String lookup(String username) throws RemoteException
     {
-        this.log("Looking up " + username + " at nameserver " + this.domain);
+        this.log.log("Looking up " + username + " at nameserver " + this.domain);
         if (this.mailBoxMap.containsKey(username))
         {
             //Returns IP and port of mailbox
@@ -221,7 +197,7 @@ public class NameserverHandler implements INameserverRemote {
 
     public void shutdown() {
         try {
-            this.log("NameserverHandler" + this.componentId + " shutting down!");
+            this.log.log("NameserverHandler" + this.componentId + " shutting down!");
             UnicastRemoteObject.unexportObject(this, true);
         } catch (NoSuchObjectException e) {
             e.printStackTrace();

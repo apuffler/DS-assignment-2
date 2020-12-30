@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 import dslab.ComponentFactory;
+import dslab.common.Log;
 import dslab.util.Config;
 
 import at.ac.tuwien.dsg.orvell.Shell;
@@ -17,18 +18,13 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
-import java.util.List;
-import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import static java.rmi.server.UnicastRemoteObject.exportObject;
+
 
 public class Nameserver implements INameserver{
 
@@ -45,7 +41,7 @@ public class Nameserver implements INameserver{
     private InputStream in;
     private PrintStream out;
     private Shell shell;
-
+    private Log log;
 
     //Store mailbox domain and ip addresses + port
     // Mailbox name (e.g vienna) , DMTP Socket address of mailbox server (127.0.0.1:16503)
@@ -80,12 +76,12 @@ public class Nameserver implements INameserver{
         this.rootNameserverBindingName = this.config.getString("root_id");
 
         //Load config, determine if root nameserver or zone nameserver
-        if (this.config.containsKey("domain"))
-        {
+        if (this.config.containsKey("domain")) {
             //Domain to manage - therefore regular Nameserver
             this.domain = this.config.getString("domain");
         }
 
+        this.log = new Log(this.shell);
 
     }
 
@@ -104,9 +100,11 @@ public class Nameserver implements INameserver{
 
     @Override
     public void run() {
+        //Setting up shell
         this.shell.setPrompt(this.componentId + "> ");
         this.shell.register(this);
 
+        //Instancing handler
         this.handler = new NameserverHandler(this.componentId, this.config, this.shell,
                 this.mailBoxMap,
                 this.nameServerMap);
@@ -116,7 +114,7 @@ public class Nameserver implements INameserver{
         {
             //IS ROOTSERVER
             //Create registry, export root NameserverHandler, bind root NameserverHandler in registry
-            this.log("Starting up root nameserver");
+            this.log.log("Starting up root nameserver");
             try {
 
                 this.registry = LocateRegistry.createRegistry(this.registryPort);
@@ -124,7 +122,7 @@ public class Nameserver implements INameserver{
                 //instantiate handler and export, then bind
                 int randomPort = 0;
                 INameserverRemote remoteHandler = (INameserverRemote) UnicastRemoteObject.exportObject(this.handler, randomPort);
-                //TODO Check: bind "this.handler" or remoteHandler?
+
                 this.registry.bind(this.rootNameserverBindingName, this.handler);
 
             } catch (RemoteException | AlreadyBoundException e) {
@@ -135,7 +133,7 @@ public class Nameserver implements INameserver{
         {
             //IS ZONESERVER
             //Export zone NameserverHandler, lookup root NameserverHandler, register Nameserver
-            this.log("Starting up zone nameserver: " + this.domain);
+            this.log.log("Starting up zone nameserver: " + this.domain);
             try {
                 int randomPort = 0;
                 //instantiate handler and export, then bind+
@@ -154,16 +152,7 @@ public class Nameserver implements INameserver{
         this.shell.run();
     }
 
-    public void log(String s)
-    {
-        LocalTime time = LocalTime.now();
-        String timeColonPattern = "HH:mm:ss";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeColonPattern);
-        String formattedTime = time.format(formatter);
-        String logline = "%s : %s";
-        this.shell.out().println(String.format(logline, formattedTime, s));
-        this.shell.out().flush();
-    }
+
 
     private void printEnumeratedStrings(SortedSet<String> stringSet)
     {
@@ -197,7 +186,7 @@ public class Nameserver implements INameserver{
     @Override
     public void shutdown() {
 
-        this.log("Shutting down nameserver: " + (this.isRootNameserver() ? "root" : this.domain));
+        this.log.log("Shutting down nameserver: " + (this.isRootNameserver() ? "root" : this.domain));
 
         //Shutdown handler (it unregisters itself)
         this.handler.shutdown();
@@ -211,7 +200,7 @@ public class Nameserver implements INameserver{
             }
         }
 
-        this.log("Nameserver stopped.");
+        this.log.log("Nameserver stopped.");
         //Shell beenden
         throw new StopShellException();
     }
