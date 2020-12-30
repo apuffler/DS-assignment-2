@@ -36,19 +36,19 @@ public class Nameserver implements INameserver{
      * @param in the input stream to read console input from
      * @param out the output stream to write console output to
      */
-    private String componentId;
-    private Config config;
-    private InputStream in;
-    private PrintStream out;
-    private Shell shell;
-    private Log log;
+    private final String componentId;
+    private final Config config;
+    private final InputStream in;
+    private final PrintStream out;
+    private final Shell shell;
+    private final Log log;
 
     //Store mailbox domain and ip addresses + port
     // Mailbox name (e.g vienna) , DMTP Socket address of mailbox server (127.0.0.1:16503)
     ConcurrentSkipListMap<String, String> mailBoxMap = new ConcurrentSkipListMap<String, String>(String.CASE_INSENSITIVE_ORDER);
     //Store (remote?) references to other known Nameservers
     // Domain name (e.g. 'planet' or 'earth.planet'), Remote Object of Nameserver
-    ConcurrentSkipListMap<String, INameserverRemote> nameServerMap = new ConcurrentSkipListMap<>(String.CASE_INSENSITIVE_ORDER);
+    ConcurrentSkipListMap<String, INameserverRemote> nameServerMap = new ConcurrentSkipListMap<String, INameserverRemote>(String.CASE_INSENSITIVE_ORDER);
 
     //Nameserver Handler
     private NameserverHandler handler;
@@ -56,9 +56,9 @@ public class Nameserver implements INameserver{
     //Store registry (rootserver only)
     private Registry registry = null;
 
-    private String registryHost;
-    private int registryPort;
-    private String rootNameserverBindingName;
+    private final String registryHost;
+    private final int registryPort;
+    private final String rootNameserverBindingName;
 
     //Root Nameserver: domain == null, zone nameserver: domain != null
     private String domain = null;
@@ -178,6 +178,7 @@ public class Nameserver implements INameserver{
         {
             domainAddressList.add(domain + " " + this.mailBoxMap.get(domain));
         }
+        //TODO: Check this raw assignment/conversion of ConcurrentSkipListSet to SortedSet
         this.printEnumeratedStrings(new ConcurrentSkipListSet(domainAddressList));
     }
 

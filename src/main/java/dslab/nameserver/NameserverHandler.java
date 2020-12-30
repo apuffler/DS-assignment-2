@@ -99,8 +99,6 @@ public class NameserverHandler implements INameserverRemote {
         {
             if(this.nameServerMap.containsKey(parsedDomain.getTLD()))
             {
-                //TODO: What to do when exception (RemoteException, AlreadyRegisteredException, InvalidDomainException)
-                //TODO: gets thrown? (especially RemoteException) retry in a couple milliseconds?
                 //Domain not fully resolved but next nameserver found, forward call
                 this.nameServerMap.get(parsedDomain.getTLD()).registerNameserver(parsedDomain.getSubdomains(),nameserver);
             }
