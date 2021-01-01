@@ -1,10 +1,18 @@
 package dslab.client.connection;
 
+import dslab.client.util.EncryptionManager;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 public class DMAPConnection implements Connection {
     private String host;
@@ -14,11 +22,13 @@ public class DMAPConnection implements Connection {
     private Socket socket;
     private BufferedReader in;
     private PrintStream out;
+    private EncryptionManager  encryptionManager;
 
-    public DMAPConnection(String host, int port, PrintStream console){
+    public DMAPConnection(String host, int port, PrintStream console, EncryptionManager encryptionManager){
         this.host = host;
         this.port = port;
         this.console = console;
+        this.encryptionManager = encryptionManager;
     }
 
     @Override
@@ -45,8 +55,11 @@ public class DMAPConnection implements Connection {
 
         try{
             line = this.in.readLine();
+            if(encryptionManager.aesActive()) {
+                line = encryptionManager.decryptWithAes(line);
+            }
             line = line.replaceAll("S> ", "").replaceAll("C> ", "").trim();
-        }catch(IOException e){
+        }catch(Exception e){
             e.printStackTrace();
         }
 
@@ -54,8 +67,20 @@ public class DMAPConnection implements Connection {
     }
 
     @Override
+    public EncryptionManager getEncryptionManager() {
+        return this.encryptionManager;
+    }
+
+    @Override
     public void writeCon(String msg) {
-        this.out.println(msg);
+        if (encryptionManager.aesActive()) {
+            try {
+                msg = encryptionManager.encryptWithAes(msg);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+            this.out.println(msg);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class InboxCommand implements Command{
                 break;
             }
 
-            try{
+            try{ // TODO: Fix this with line 'no mailbox found!'
                 int pos = line.indexOf(' ');
                 int id = Integer.parseInt(line.substring(0,pos).trim());
                 ids.push(id);

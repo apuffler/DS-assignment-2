@@ -3,12 +3,13 @@ package dslab.protocols.dmap;
 import at.ac.tuwien.dsg.orvell.StopShellException;
 import dslab.basic.BasicServer;
 import dslab.basic.TCPClient;
+import dslab.client.util.EncryptionManager;
 import dslab.protocols.Message;
 import dslab.protocols.ProtocolException;
+import dslab.util.Keys;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -19,6 +20,7 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 
 public class DMAPClient extends TCPClient implements MessageAccessProtocol {
 
@@ -31,6 +33,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
     private PrivateKey privateKey;
     private String keyFileName;
     private Cipher cipher;
+    private EncryptionManager encryptionManager;
 
 
     public DMAPClient(Socket socket, BasicServer server, MessageAccessProtocolServer protocol, String protocolname) throws IOException {
@@ -38,10 +41,18 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         this.protocol = protocol;
         this.username = null;
         this.keyFileName = "mailbox-" + this.server.getName().replace(".","-");
+        this.encryptionManager = new EncryptionManager();
     }
 
     @Override
     public void processLine(String line) {
+        if (encryptionManager.aesActive()) {
+            try {
+                line = encryptionManager.decryptWithAes(line);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         if (!handshakeInProgress) { // normal DMAP2.0 commands when not in handshake
 
@@ -68,7 +79,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
                             delete(id);
                         }
                     } catch (NumberFormatException e) {
-                        this.out().println("S> No Number!");
+                        println("S> No Number!");
                     }
                     break;
                 case "login":
@@ -76,7 +87,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
                     if (pos != -1) {
                         this.login(args.substring(0, pos).trim(), args.substring(pos).trim());
                     } else {
-                        this.out().println("S> Username or Password missing!");
+                        println("S> Username or Password missing!");
                     }
                     break;
                 case "logout":
@@ -90,9 +101,13 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
 
             }
         } else { // finish handshake or die
-            handleHandShake(line);
+            try {
+                handleHandShake(line);
+            } catch (Exception e) {
+                this.shutdown();
+            }
         }
-        this.out().print("C> ");
+       // print("C> ");
 
     }
 
@@ -101,77 +116,56 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         try {
             this.protocol.login(username, password);
             this.username = username;
-            this.out().println("S> ok DMAP2.0");
+            println("S> ok DMAP2.0");
         } catch (ProtocolException e) {
-            this.out().println("S> " + e.getMessage());
+            println("S> " + e.getMessage());
         }
     }
 
     @Override
     public void list() {
         if (this.username == null) {
-            this.out().println("S> error not logged in");
+            println("S> error not logged in");
             return;
         }
         try {
             Message[] messages = this.protocol.list(this.username);
             for (Message m : messages) {
-                this.out().printf("S> %d %s %s%n", m.getID(), m.getFrom(), m.getSubject());
+                println(String.format("S> %d %s %s%n", m.getID(), m.getFrom(), m.getSubject()));
             }
-<<<<<<< HEAD
         } catch (ProtocolException e) {
-=======
-            this.out().println("S> ok");
-        }catch(ProtocolException e){
->>>>>>> origin/dominik-client
-            this.out().println("S> " + e.getMessage());
+            println("S> " + e.getMessage());
         }
     }
 
     @Override
     public void show(int msgid) {
         if (this.username == null) {
-            this.out().println("S> error not logged in");
+            println("S> error not logged in");
             return;
         }
-<<<<<<< HEAD
-        try {
-            Message m = this.protocol.show(this.username, msgid);
-            this.out().printf("S> from %s%n", m.getFrom());
-            this.out().printf("S> to %s%n", m.getTo());
-            this.out().printf("S> subject %s%n", m.getSubject());
-            this.out().printf("S> data %s%n", m.getData());
-        } catch (ProtocolException e) {
-            this.out().printf("S> %s%n", e.getMessage());
-=======
         try{
             Message m = this.protocol.show(this.username,msgid);
-            this.out().printf("S> from %s%n",m.getFrom());
-            this.out().printf("S> to %s%n",m.getTo());
-            this.out().printf("S> subject %s%n",m.getSubject());
-            this.out().printf("S> data %s%n",m.getData());
-            this.out().println("S> ok");
+            println(String.format("S> from %s%n",m.getFrom()));
+            println(String.format("S> to %s%n",m.getTo()));
+            println(String.format("S> subject %s%n",m.getSubject()));
+            println(String.format("S> data %s%n",m.getData()));
+            println("S> ok");
         }catch(ProtocolException e){
-            this.out().printf("S> %s%n" , e.getMessage());
->>>>>>> origin/dominik-client
+            println(String.format("S> %s%n" , e.getMessage()));
         }
     }
 
     @Override
     public void delete(int msgid) {
         if (this.username == null) {
-            this.out().println("S> error not logged in");
+            println("S> error not logged in");
             return;
         }
         try {
             this.protocol.delete(this.username, msgid);
-<<<<<<< HEAD
         } catch (ProtocolException e) {
-=======
-            this.out().println("S> ok");
-        }catch(ProtocolException e){
->>>>>>> origin/dominik-client
-            this.out().println("S> " + e.getMessage());
+            println("S> " + e.getMessage());
         }
     }
 
@@ -187,7 +181,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
 
     @Override
     public void quit() {
-        this.out().println("S> ok bye");
+        println("S> ok bye");
         this.shutdown();
         throw new StopShellException();
     }
@@ -196,18 +190,16 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
     public void startsecure() {
         this.establishPrivateKey();
         this.establishCipher();
-        this.out().println("S> ok " + this.keyFileName);
+        println("S> ok " + this.keyFileName);
         this.handshakeInProgress = true;
         this.handshakeStage = 1;
     }
 
     private void establishPrivateKey(){
         try {
-            byte[] pk = Files.readAllBytes(Paths.get(("keys/server/" + this.keyFileName +".der")));
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(pk);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            this.privateKey = keyFactory.generatePrivate(spec);
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            File pk = new File(("keys/server/" + this.keyFileName +".der"));
+            this.privateKey = Keys.readPrivateKey(pk);
+        } catch (IOException e) {
             this.shutdown();
         }
     }
@@ -221,7 +213,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         }
     }
 
-    public void handleHandShake(String line) {
+    public void handleHandShake(String line) throws InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidAlgorithmParameterException {
         switch (handshakeStage) {
             case 1:
                 handleClientChallenge(line);
@@ -232,27 +224,71 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         }
     }
 
-    private void handleClientChallenge(String line) {
-        String[] parts = line.split(" ");
+    private void handleClientChallenge(String line) throws IllegalBlockSizeException, InvalidKeyException,
+            BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+        String decrypted = encryptionManager.decryptBase64WithRSA(privateKey,line);
+        Base64.Decoder decoder = Base64.getDecoder();
+        String[] parts = decrypted.split(" ");
         if (parts.length != 4) {
             this.shutdown(); // kill if handshake wrong w.o. any error msg.
         }
 
         String msgReceivedOk = parts[0];
         String clientChallenge = parts[1];
-        String aesSecretKey = parts[2];
-        String initializationVector = parts[3];
+        byte[] aesSecretKey = decoder.decode(parts[2]);
+        byte[] initializationVector = decoder.decode(parts[3]);
 
         if (!msgReceivedOk.equals("ok")) {
             this.shutdown();
         }
 
-
+        setupAes(aesSecretKey, initializationVector);
+        sendAesEncChallengeResponse(clientChallenge);
         this.handshakeStage = 2;
     }
 
-    private void verifyClientHandshakeCompletion(String line) {
+    private void sendAesEncChallengeResponse(String challenge) throws NoSuchPaddingException, InvalidKeyException,
+            NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+        String response = "ok " + challenge;
+        String encResponse = encryptionManager.encryptWithAes(response);
+        println(encResponse);
+    }
 
+    private void setupAes(byte[] aesSecret, byte[] iv) {
+        encryptionManager.setInitializationVector(iv);
+        encryptionManager.setSecretKey(aesSecret);
+    }
+
+    private void verifyClientHandshakeCompletion(String line) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+        String decResp = encryptionManager.decryptWithAes(line);
+        if (!decResp.equals("ok")) {this.shutdown();}
+        encryptionManager.setEncActive(true);
+        handshakeInProgress = false;
+    }
+
+
+    private void println(String line){
+        if(encryptionManager.aesActive()) {
+            line = encMsg(line);
+        }
+        this.out().println(line);
+    }
+
+    private void print(String line){
+        if(encryptionManager.aesActive()) {
+            line = encMsg(line);
+        }
+        this.out().print(line);
+    }
+
+    private String encMsg(String line){
+        try {
+            return encryptionManager.encryptWithAes(line);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        this.shutdown();
+        return null;
     }
 
 

@@ -1,5 +1,5 @@
-dslab/nameserver/Nameserver.java
- dslab.nameserver.Nameserver
+dslab/ComponentFactory.java
+ dslab.ComponentFactory
 dslab/monitoring/MonitoringServer.java
  dslab.monitoring.MonitoringServer
 dslab/protocols/dmtp/DMTPClient.java
@@ -8,8 +8,6 @@ dslab/mailbox/IMailboxServer.java
  dslab.mailbox.IMailboxServer
 dslab/util/Keys.java
  dslab.util.Keys
-dslab/transfer/DeliveryManager.java
- dslab.transfer.DeliveryManager
 dslab/protocols/dmap/MessageAccessProtocolServer.java
  dslab.protocols.dmap.MessageAccessProtocolServer
 dslab/monitoring/IMonitoringServer.java
@@ -20,51 +18,81 @@ dslab/basic/TCPClient.java
  dslab.basic.TCPClient
 dslab/protocols/dmap/MessageAccessProtocol.java
  dslab.protocols.dmap.MessageAccessProtocol
-dslab/transfer/ITransferServer.java
- dslab.transfer.ITransferServer
-dslab/monitoring/UDPServer.java
- dslab.monitoring.UDPServer
 dslab/protocols/dmtp/MessageTransferProtocol.java
  dslab.protocols.dmtp.MessageTransferProtocol
-dslab/client/MessageClient.java
- dslab.client.MessageClient
+dslab/client/INBOXManager.java
+ dslab.client.INBOXManager
 dslab/client/IMessageClient.java
  dslab.client.IMessageClient
+dslab/client/DMAPConnectionOLD.java
+ dslab.client.DMAPConnectionOLD
 dslab/nameserver/INameserver.java
  dslab.nameserver.INameserver
-dslab/protocols/ProtocolException.java
- dslab.protocols.ProtocolException
-dslab/transfer/DeliveryTask.java
- dslab.transfer.DeliveryTask
+dslab/basic/TCPServer.java
+ dslab.basic.TCPServer
 dslab/mailbox/MailboxHandler.java
  dslab.mailbox.MailboxHandler
-dslab/ComponentFactory.java
- dslab.ComponentFactory
+dslab/client/commands/StartSecureCommand.java
+ dslab.client.commands.StartSecureCommand
+dslab/transfer/DNSService.java
+ dslab.transfer.DNSService
+dslab/util/Config.java
+ dslab.util.Config
 dslab/protocols/dmtp/MessageTransferProtocolServer.java
  dslab.protocols.dmtp.MessageTransferProtocolServer
 dslab/basic/Email.java
  dslab.basic.Email
-dslab/transfer/DNSService.java
- dslab.transfer.DNSService
-dslab/nameserver/INameserverRemote.java
- dslab.nameserver.INameserverRemote
-dslab/nameserver/InvalidDomainException.java
- dslab.nameserver.InvalidDomainException
+dslab/basic/ThreadedCommunication.java
+ dslab.basic.ThreadedCommunication
+dslab/monitoring/UDPServer.java
+ dslab.monitoring.UDPServer
 dslab/basic/BasicServer.java
  dslab.basic.BasicServer
 dslab/transfer/TransferServer.java
  dslab.transfer.TransferServer
-dslab/util/Config.java
- dslab.util.Config
-dslab/basic/ThreadedCommunication.java
- dslab.basic.ThreadedCommunication
-dslab/basic/TCPServer.java
- dslab.basic.TCPServer
 dslab/nameserver/AlreadyRegisteredException.java
  dslab.nameserver.AlreadyRegisteredException
 dslab/protocols/DMessage.java
  dslab.protocols.DMessage
-dslab/protocols/dmap/DMAPClient.java
- dslab.protocols.dmap.DMAPClient
+dslab/transfer/DeliveryTask.java
+ dslab.transfer.DeliveryTask
+dslab/nameserver/Nameserver.java
+ dslab.nameserver.Nameserver
+dslab/nameserver/InvalidDomainException.java
+ dslab.nameserver.InvalidDomainException
+dslab/protocols/ProtocolException.java
+ dslab.protocols.ProtocolException
+dslab/transfer/DeliveryManager.java
+ dslab.transfer.DeliveryManager
+dslab/nameserver/INameserverRemote.java
+ dslab.nameserver.INameserverRemote
+dslab/transfer/ITransferServer.java
+ dslab.transfer.ITransferServer
+dslab/client/commands/LogoutCommand.java
+ dslab.client.commands.LogoutCommand
+dslab/client/connection/Connection.java
+ dslab.client.connection.Connection
+dslab/client/commands/LoginCommand.java
+ dslab.client.commands.LoginCommand
+dslab/client/connection/DMTPConnection.java
+ dslab.client.connection.DMTPConnection
+dslab/client/commands/MsgCommand.java
+ dslab.client.commands.MsgCommand
 dslab/mailbox/MailboxServer.java
  dslab.mailbox.MailboxServer
+dslab/client/commands/DeleteCommand.java
+ dslab.client.commands.DeleteCommand
+dslab/protocols/dmap/DMAPClient.java
+ dslab.protocols.dmap.DMAPClient
+dslab/client/connection/DMAPConnection.java
+ dslab.client.connection.DMAPConnection
+dslab/client/util/EncryptionManager.java
+ dslab.client.util.EncryptionManager
+dslab/client/commands/Command.java
+ dslab.client.commands.Command
+dslab/client/commands/VerifyCommand.java
+ dslab.client.commands.VerifyCommand
+dslab/client/commands/InboxCommand.java
+ dslab.client.commands.InboxCommand
+dslab/client/MessageClient.java
+ dslab.client.MessageClient
