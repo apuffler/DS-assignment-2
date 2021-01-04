@@ -18,8 +18,8 @@ dslab/mailbox/MailboxServerTest.java
  dslab.mailbox.MailboxServerTest
 dslab/Sockets.java
  dslab.Sockets
-dslab/mailbox/MailboxStartsecureTest.java
- dslab.mailbox.MailboxStartsecureTest
+dslab/NullOutputStream.java
+ dslab.NullOutputStream
 dslab/client/MessageClientStartupTest.java
  dslab.client.MessageClientStartupTest
 dslab/JunitSocketClient.java
@@ -32,13 +32,13 @@ dslab/SimpleTcpServer.java
  dslab.SimpleTcpServer
 dslab/monitoring/MonitoringServerTest.java
  dslab.monitoring.MonitoringServerTest
-dslab/mailbox/MailboxServerProtocolTest.java
- dslab.mailbox.MailboxServerProtocolTest
+dslab/naming/NameserverTest.java
+ dslab.naming.NameserverTest
 dslab/transfer/TransferServerTest.java
  dslab.transfer.TransferServerTest
 dslab/monitoring/MonitoringServerProtocolTest.java
  dslab.monitoring.MonitoringServerProtocolTest
-dslab/naming/NameserverTest.java
- dslab.naming.NameserverTest
-dslab/NullOutputStream.java
- dslab.NullOutputStream
+dslab/mailbox/MailboxStartsecureTest.java
+ dslab.mailbox.MailboxStartsecureTest
+dslab/mailbox/MailboxServerProtocolTest.java
+ dslab.mailbox.MailboxServerProtocolTest

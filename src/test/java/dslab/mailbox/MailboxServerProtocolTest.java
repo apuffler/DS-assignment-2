@@ -47,7 +47,7 @@ public class MailboxServerProtocolTest extends TestBase {
     @Test(timeout = 15000)
     public void loginAndLogout_withValidLogin() throws Exception {
         try (JunitSocketClient client = new JunitSocketClient(dmapServerPort, err)) {
-            client.verify("ok DMAP");
+            client.verify("ok DMAP2.0");
             client.sendAndVerify("login trillian 12345", "ok");
             client.sendAndVerify("logout", "ok");
             client.sendAndVerify("quit", "ok bye");

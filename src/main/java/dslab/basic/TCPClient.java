@@ -93,10 +93,10 @@ public class TCPClient implements ThreadedCommunication{
 
     public void processLine(String line){
         if(line.startsWith("quit")){
-            println(line);
+            println("S> ok bye");
             this.shutdown();
         }else{
-            println(line);
+            println("Wrong Command!");
             this.shutdown();
         }
     }
