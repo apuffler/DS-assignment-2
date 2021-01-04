@@ -59,7 +59,7 @@ public class TCPClient implements ThreadedCommunication{
 
     @Override
     public void run() {
-        println("S> ok " + this.protocolname);
+        println("ok " + this.protocolname);
         print("C> ");
         try{
             while(!this.thread.isInterrupted()){
@@ -93,7 +93,7 @@ public class TCPClient implements ThreadedCommunication{
 
     public void processLine(String line){
         if(line.startsWith("quit")){
-            println("S> ok bye");
+            println("ok bye");
             this.shutdown();
         }else{
             println("Wrong Command!");

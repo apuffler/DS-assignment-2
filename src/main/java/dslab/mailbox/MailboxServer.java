@@ -21,7 +21,7 @@ import dslab.util.Config;
 
 public class MailboxServer implements IMailboxServer, Runnable, BasicServer {
 
-    private static final String dmap_name = "DMAP2.0", dmtp_name = "DMTP";
+    private static final String dmap_name = "DMAP2.0", dmtp_name = "DMTP2.0";
 
     private final String name;
     private final Config config;

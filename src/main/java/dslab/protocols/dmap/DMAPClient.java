@@ -79,7 +79,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
                             delete(id);
                         }
                     } catch (NumberFormatException e) {
-                        println("S> No Number!");
+                        println("No Number!");
                     }
                     break;
                 case "login":
@@ -87,7 +87,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
                     if (pos != -1) {
                         this.login(args.substring(0, pos).trim(), args.substring(pos).trim());
                     } else {
-                        println("S> Username or Password missing!");
+                        println("Username or Password missing!");
                     }
                     break;
                 case "logout":
@@ -107,8 +107,6 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
                 this.shutdown();
             }
         }
-       // print("C> ");
-
     }
 
     @Override
@@ -116,73 +114,73 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         try {
             this.protocol.login(username, password);
             this.username = username;
-            println("S> ok DMAP2.0");
+            println("ok DMAP2.0");
         } catch (ProtocolException e) {
-            println("S> " + e.getMessage());
+            println(e.getMessage());
         }
     }
 
     @Override
     public void list() {
         if (this.username == null) {
-            println("S> error not logged in");
+            println("error not logged in");
             return;
         }
         try {
             Message[] messages = this.protocol.list(this.username);
             for (Message m : messages) {
-                println(String.format("S> %d %s %s%n", m.getID(), m.getFrom(), m.getSubject()));
+                println(String.format("%d %s %s%n", m.getID(), m.getFrom(), m.getSubject()));
             }
         } catch (ProtocolException e) {
-            println("S> " + e.getMessage());
+            println(e.getMessage());
         }
     }
 
     @Override
     public void show(int msgid) {
         if (this.username == null) {
-            println("S> error not logged in");
+            println("error not logged in");
             return;
         }
         try{
             Message m = this.protocol.show(this.username,msgid);
-            println(String.format("S> from %s%n",m.getFrom()));
-            println(String.format("S> to %s%n",m.getTo()));
-            println(String.format("S> subject %s%n",m.getSubject()));
-            println(String.format("S> data %s%n",m.getData()));
-            println(String.format("S> hash %s%n",m.getHash()));
-            println("S> ok");
+            println(String.format("from %s%n",m.getFrom()));
+            println(String.format("to %s%n",m.getTo()));
+            println(String.format("subject %s%n",m.getSubject()));
+            println(String.format("data %s%n",m.getData()));
+            println(String.format("hash %s%n",m.getHash()));
+            println("ok");
         }catch(ProtocolException e){
-            println(String.format("S> %s%n" , e.getMessage()));
+            println(String.format("%s%n" , e.getMessage()));
         }
     }
 
     @Override
     public void delete(int msgid) {
         if (this.username == null) {
-            println("S> error not logged in");
+            println("error not logged in");
             return;
         }
         try {
             this.protocol.delete(this.username, msgid);
         } catch (ProtocolException e) {
-            println("S> " + e.getMessage());
+            println("" + e.getMessage());
         }
     }
 
     @Override
     public void logout() {
         if (this.username == null) {
-            println("S> error not logged in");
+            println("error not logged in");
             return;
         }
         this.username = null;
-        printf("S> ok%n");
+        printf("ok%n");
     }
 
     @Override
     public void quit() {
-        println("S> ok bye");
+        println("ok bye");
         this.shutdown();
         throw new StopShellException();
     }
@@ -191,7 +189,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
     public void startsecure() {
         this.establishPrivateKey();
         this.establishCipher();
-        println("S> ok " + this.keyFileName);
+        println("ok " + this.keyFileName);
         this.handshakeInProgress = true;
         this.handshakeStage = 1;
     }

@@ -32,8 +32,8 @@ dslab/client/DMAPConnectionOLD.java
  dslab.client.DMAPConnectionOLD
 dslab/nameserver/INameserver.java
  dslab.nameserver.INameserver
-dslab/mailbox/MailboxServer.java
- dslab.mailbox.MailboxServer
+dslab/util/Config.java
+ dslab.util.Config
 dslab/mailbox/MailboxHandler.java
  dslab.mailbox.MailboxHandler
 dslab/client/commands/LogoutCommand.java
@@ -82,12 +82,12 @@ dslab/client/commands/StartSecureCommand.java
  dslab.client.commands.StartSecureCommand
 dslab/protocols/dmtp/MessageTransferProtocol.java
  dslab.protocols.dmtp.MessageTransferProtocol
-dslab/client/MessageClient.java
- dslab.client.MessageClient
+dslab/protocols/dmap/DMAPClient.java
+ dslab.protocols.dmap.DMAPClient
 dslab/protocols/ProtocolException.java
  dslab.protocols.ProtocolException
-dslab/client/commands/LoginCommand.java
- dslab.client.commands.LoginCommand
+dslab/mailbox/MailboxServer.java
+ dslab.mailbox.MailboxServer
 dslab/client/MessageVerifier.java
  dslab.client.MessageVerifier
 dslab/nameserver/INameserverRemote.java
@@ -96,11 +96,11 @@ dslab/client/connection/DMAPConnection.java
  dslab.client.connection.DMAPConnection
 dslab/nameserver/InvalidDomainException.java
  dslab.nameserver.InvalidDomainException
-dslab/util/Config.java
- dslab.util.Config
 dslab/basic/TCPClient.java
  dslab.basic.TCPClient
 dslab/protocols/dmtp/DMTPClient.java
  dslab.protocols.dmtp.DMTPClient
-dslab/protocols/dmap/DMAPClient.java
- dslab.protocols.dmap.DMAPClient
+dslab/client/commands/LoginCommand.java
+ dslab.client.commands.LoginCommand
+dslab/client/MessageClient.java
+ dslab.client.MessageClient
