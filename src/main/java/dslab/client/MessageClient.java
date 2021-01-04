@@ -17,6 +17,7 @@ import dslab.client.commands.*;
 import dslab.client.connection.Connection;
 import dslab.client.connection.DMAPConnection;
 import dslab.client.connection.DMTPConnection;
+import dslab.client.util.EncryptionManager;
 import dslab.protocols.DMessage;
 import dslab.protocols.Message;
 import dslab.util.Config;
@@ -32,6 +33,7 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
     private Shell shell;
 
     private Connection mailbox;
+    private EncryptionManager encryptionManager;
 
     private HashMap<Integer, Message> inbox;
 
@@ -48,18 +50,22 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
         this.config = config;
         this.shell = new Shell(in,out);
         this.inbox = new HashMap<Integer, Message>();
+        this.encryptionManager = new EncryptionManager();
     }
 
     @Override
     public void run() {
         //Startup connections
-        this.mailbox = new DMAPConnection(this.config.getString("mailbox.host"), this.config.getInt("mailbox.port"), this.shell.out());
+        this.mailbox = new DMAPConnection(this.config.getString("mailbox.host"), this.config.getInt("mailbox.port"), this.shell.out(),encryptionManager);
         try {
             this.mailbox.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.mailbox.readCon();
+
+        //Establish secure connection before login
+        new StartSecureCommand().execute(this.mailbox, this);
         //Login
         new LoginCommand().execute(this.mailbox, this);
 
@@ -127,6 +133,15 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
         new LogoutCommand().execute(this.mailbox, this);
         this.mailbox.stop();
         throw new StopShellException();
+    }
+
+    @Command
+    public void startsecure() {
+        if(!encryptionManager.aesActive()) {
+            new StartSecureCommand().execute(this.mailbox, this);
+        } else {
+            this.shell.out().println("Encryption already active!");
+        }
     }
 
     @Override

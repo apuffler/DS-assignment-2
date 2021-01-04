@@ -5,7 +5,7 @@ import java.net.Socket;
 
 public class TCPClient implements ThreadedCommunication{
     private Socket socket;
-    private BasicServer server;
+    protected BasicServer server;
     private String protocolname;
 
     private Thread thread;
@@ -59,8 +59,8 @@ public class TCPClient implements ThreadedCommunication{
 
     @Override
     public void run() {
-        this.out.println("S> ok " + this.protocolname);
-        this.out.print("C> ");
+        println("S> ok " + this.protocolname);
+        print("C> ");
         try{
             while(!this.thread.isInterrupted()){
 
@@ -93,11 +93,19 @@ public class TCPClient implements ThreadedCommunication{
 
     public void processLine(String line){
         if(line.startsWith("quit")){
-            this.out.println("S> ok bye");
+            println(line);
             this.shutdown();
         }else{
-            this.out.println("Wrong Command!");
+            println(line);
             this.shutdown();
         }
+    }
+
+    void println(String line) {
+        this.out.println(line);
+    }
+
+    void print(String line) {
+        this.out.print(line);
     }
 }

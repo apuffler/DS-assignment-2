@@ -21,7 +21,7 @@ import dslab.util.Config;
 
 public class MailboxServer implements IMailboxServer, Runnable, BasicServer {
 
-    private static final String dmap_name = "DMAP", dmtp_name = "DMTP";
+    private static final String dmap_name = "DMAP2.0", dmtp_name = "DMTP";
 
     private final String name;
     private final Config config;
@@ -140,5 +140,9 @@ public class MailboxServer implements IMailboxServer, Runnable, BasicServer {
     public static void main(String[] args) throws Exception {
         IMailboxServer server = ComponentFactory.createMailboxServer(args[0], System.in, System.out);
         server.run();
+    }
+
+    public String getName() {
+      return name;
     }
 }
