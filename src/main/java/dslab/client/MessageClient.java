@@ -121,6 +121,15 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
         throw new StopShellException();
     }
 
+    @Command
+    public void startsecure() {
+        if(!encryptionManager.aesActive()) {
+            new StartSecureCommand().execute(this.mailbox, this);
+        } else {
+            this.shell.out().println("Encryption already active!");
+        }
+    }
+
     @Override
     public void updateINBOX(HashMap<Integer, Message> inbox) {
         this.inbox = inbox;

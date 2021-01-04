@@ -172,11 +172,11 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
     @Override
     public void logout() {
         if (this.username == null) {
-            this.out().println("S> error not logged in");
+            println("S> error not logged in");
             return;
         }
         this.username = null;
-        this.out().printf("S> ok%n");
+        printf("S> ok%n");
     }
 
     @Override
@@ -279,6 +279,13 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             line = encMsg(line);
         }
         this.out().print(line);
+    }
+
+    private void printf(String line) {
+        if(encryptionManager.aesActive()) {
+            line = encMsg(line);
+        }
+        this.out().printf(line);
     }
 
     private String encMsg(String line){
