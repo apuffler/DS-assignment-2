@@ -23,7 +23,7 @@ public class LoginCommand implements Command {
 
         String line = this.con.readCon();
         if(!"ok".equals(line)){
-            //this.con.console().println("LoginCommand: " + line);
+            this.con.console().println("LoginCommand: " + line);
         }
     }
 }
