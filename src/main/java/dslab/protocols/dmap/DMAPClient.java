@@ -131,6 +131,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             for (Message m : messages) {
                 println(String.format("%d %s %s%n", m.getID(), m.getFrom(), m.getSubject()));
             }
+            println("ok");
         } catch (ProtocolException e) {
             println(e.getMessage());
         }

@@ -96,6 +96,7 @@ public class MessageClientMailboxTest {
         Thread.sleep(2000); // wait a bit
 
         messageClientIn.addLine("inbox");
+        Thread.sleep(200);
         String output = messageClientOut.listen();
 
         err.checkThat(output, allOf(
