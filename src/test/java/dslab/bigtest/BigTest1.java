@@ -4,6 +4,7 @@ import dslab.*;
 import dslab.basic.ThreadedCommunication;
 import dslab.mailbox.IMailboxServer;
 import dslab.monitoring.IMonitoringServer;
+import dslab.nameserver.INameserver;
 import dslab.transfer.ITransferServer;
 import dslab.util.Config;
 import org.apache.commons.logging.Log;
@@ -29,20 +30,56 @@ public class BigTest1 extends TestBase {
     private String transfer2 = "transfer-2";
     private String monitoring = "monitoring";
 
+    private String ns_root = "ns-root";
+    private String ns_ze = "ns-ze";
+    private String ns_planet = "ns-planet";
+    private String ns_planet_earth = "ns-earth-planet";
+
     private IMailboxServer mailboxcomp;
     private ITransferServer t1, t2;
     private IMonitoringServer monitoringcomp;
+    private INameserver root,ze,planet, planet_earth;
 
-    private Thread tmb, tt1, tt2, tmon;
+    private Thread tmb, tt1, tt2, tmon, nroot,nze,nplanet,nplanet_earth;
 
     private int mb_tp, mb_ap, t1p, t2p, mp;
 
-    private TestInputStream mb_in, t1_in, t2_in, mon_in;
-    private TestOutputStream mb_out, t1_out, t2_out, mon_out;
+    private TestInputStream mb_in, t1_in, t2_in, mon_in, nsroot_in, nsze_in, nsplanet_in, nsplanet_earth_in;
+    private TestOutputStream mb_out, t1_out, t2_out, mon_out, nsroot_out, nsze_out, nsplanet_out, nsplanet_earth_out;
 
 
     @Before
     public void setUp() throws Exception {
+        //Starting Nameserver;
+        nsroot_in = new TestInputStream();
+        nsze_in = new TestInputStream();
+        nsplanet_in = new TestInputStream();
+        nsplanet_earth_in = new TestInputStream();
+
+        nsroot_out = new TestOutputStream();
+        nsze_out = new TestOutputStream();
+        nsplanet_out = new TestOutputStream();
+        nsplanet_earth_out = new TestOutputStream();
+
+        root = ComponentFactory.createNameserver(ns_root, nsroot_in, nsroot_out);
+        ze = ComponentFactory.createNameserver(ns_ze, nsze_in, nsze_out);
+        planet = ComponentFactory.createNameserver(ns_planet, nsplanet_in, nsplanet_out);
+        planet_earth = ComponentFactory.createNameserver(ns_planet_earth, nsplanet_earth_in, nsplanet_earth_out);
+
+        nroot = new Thread(root);
+        nze = new Thread(ze);
+        nplanet = new Thread(planet);
+        nplanet_earth = new Thread(planet_earth);
+
+        nroot.start();
+        Thread.sleep(Constants.COMPONENT_STARTUP_WAIT);
+        nze.start();
+        Thread.sleep(Constants.COMPONENT_STARTUP_WAIT);
+        nplanet.start();
+        Thread.sleep(Constants.COMPONENT_STARTUP_WAIT);
+        nplanet_earth.start();
+        Thread.sleep(Constants.COMPONENT_STARTUP_WAIT);
+
         mb_in = new TestInputStream();
         t1_in = new TestInputStream();
         t2_in = new TestInputStream();
@@ -87,10 +124,16 @@ public class BigTest1 extends TestBase {
 
     @After
     public void tearDown() throws Exception {
+
         mb_in.addLine("shutdown"); // send "shutdown" command to command line
         t1_in.addLine("shutdown"); // send "shutdown" command to command line
         t2_in.addLine("shutdown"); // send "shutdown" command to command line
         mon_in.addLine("shutdown"); // send "shutdown" command to command line
+
+        nsplanet_earth_in.addLine("shutdown");
+        nsplanet_in.addLine("shutdown");
+        nsze_in.addLine("shutdown");
+        nsroot_in.addLine("shutdown");
         Thread.sleep(Constants.COMPONENT_TEARDOWN_WAIT);
     }
 
