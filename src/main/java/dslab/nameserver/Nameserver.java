@@ -157,9 +157,12 @@ public class Nameserver implements INameserver{
     private void printEnumeratedStrings(SortedSet<String> stringSet)
     {
         int i = 1;
+        String toPrint = "";
         for (String s : stringSet)
         {
-            this.shell.out().printf("%d. %s %n", i, s);
+            toPrint = String.format("%d. %s %n", i, s);
+            this.shell.out().printf(toPrint);
+            this.shell.out().flush();
             i++;
         }
     }
