@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +17,9 @@ import dslab.ComponentFactory;
 import dslab.basic.BasicServer;
 import dslab.basic.TCPServer;
 import dslab.basic.ThreadedCommunication;
+import dslab.nameserver.AlreadyRegisteredException;
+import dslab.nameserver.INameserverRemote;
+import dslab.nameserver.InvalidDomainException;
 import dslab.protocols.*;
 import dslab.protocols.dmap.DMAPClient;
 import dslab.protocols.dmtp.DMTPClient;
@@ -76,9 +82,27 @@ public class MailboxServer implements IMailboxServer, Runnable, BasicServer {
             this.dmapServer.start();
             this.dmtpServer.start();
 
+            String registryHost = this.config.getString("registry.host");
+            Integer registryPort = this.config.getInt("registry.port");
+            String rootNameserverId = this.config.getString("root_id");
+
+            //Get registry, from registry rootNS
+            Registry registry = LocateRegistry.getRegistry(registryHost, registryPort);
+            INameserverRemote rootNameserver = (INameserverRemote) registry.lookup(rootNameserverId);
+
+            String add = this.dmtpServer.getLocalAddress();
+            //System.out.println(add);
+            rootNameserver.registerMailboxServer(this.config.getString("domain"), add);
+
             this.shell.out().printf("%s> started!%n",this.name);
             this.shell.run();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        } catch (InvalidDomainException e) {
+            e.printStackTrace();
+        } catch (AlreadyRegisteredException e) {
             e.printStackTrace();
         }
         System.out.println("Exiting the shell, bye!");

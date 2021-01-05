@@ -149,7 +149,7 @@ public class BigTest1 extends TestBase {
             client.sendAndVerify("send", "ok");
             client.sendAndVerify("quit","ok bye");
         }
-    /*
+
         try (JunitSocketClient client = new JunitSocketClient(t2p, err)) {
             client.verify("ok DMTP");
             client.sendAndVerify("begin", "ok");
@@ -200,11 +200,11 @@ public class BigTest1 extends TestBase {
         output = String.join(",", mon_out.getLines());
         assertThat(output, containsString(":12710 2"));
         assertThat(output, containsString(":12711 1"));
-*/
+
 
     }
 
-    //@Test(timeout = 15000)
+    @Test(timeout = 15000)
     public void bigTest2() throws Exception {
         try (JunitSocketClient client = new JunitSocketClient(t1p, err)) {
             client.verify("ok DMTP");
@@ -237,7 +237,7 @@ public class BigTest1 extends TestBase {
             client.send("list");
             String listResult = client.listen();
             err.checkThat(listResult, containsString("arthur@earth.planet test2"));
-            err.checkThat(listResult, containsString("mailer@127.0.1.1 ERROR Delivery"));
+            err.checkThat(listResult, containsString("mailer@127.0.0.1 ERROR Delivery"));
 
             client.sendAndVerify("logout", "ok");
 
@@ -269,7 +269,7 @@ public class BigTest1 extends TestBase {
     }
 
     //Testing delivering mail to unknown domains and resulting error mails
-    //@Test(timeout = 15000)
+    @Test(timeout = 15000)
     public void bigTest3() throws Exception {
         try (JunitSocketClient client = new JunitSocketClient(t1p, err)) {
             client.verify("ok DMTP");
@@ -301,14 +301,14 @@ public class BigTest1 extends TestBase {
 
             client.send("list");
             String listResult = client.listen();
-            err.checkThat(listResult, containsString("mailer@127.0.1.1 ERROR Domain"));
+            err.checkThat(listResult, containsString("mailer@127.0.0.1 ERROR Domain"));
             client.sendAndVerify("logout", "ok");
 
 
             client.sendAndVerify("login arthur 23456", "ok");
             client.send("list");
             listResult = client.listen();
-            err.checkThat(listResult, containsString("mailer@127.0.1.1 ERROR Domain"));
+            err.checkThat(listResult, containsString("mailer@127.0.0.1 ERROR Domain"));
             client.sendAndVerify("logout", "ok");
 
             client.sendAndVerify("quit", "ok bye");
