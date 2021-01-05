@@ -191,12 +191,12 @@ public class TransferServer implements ITransferServer, Runnable, BasicServer, M
             return currentNS.lookup(lastZone);
 
         } catch (RemoteException | NotBoundException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }
         catch (InvalidDomainException e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }
     }
