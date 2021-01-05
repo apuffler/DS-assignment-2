@@ -45,7 +45,9 @@ public class Domain {
 
     public ArrayList<String> splitDomain()
     {
-        return (ArrayList<String>) Arrays.asList(this.domain.split("."));
+        ArrayList<String> splitDomains = new ArrayList<String>();
+        splitDomains.addAll(Arrays.asList(this.domain.split("\\.")));
+        return splitDomains;
     }
 
     private void categorizeDomain() throws InvalidDomainException
