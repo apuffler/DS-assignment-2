@@ -256,7 +256,7 @@ public class BigTest1 extends TestBase {
         mon_in.addLine("addresses"); // send "addresses" command to command line
         Thread.sleep(2500);
         String output = String.join(",", mon_out.getLines());
-        assertThat(output, containsString("trillian@earth.planet 1"));
+        assertThat(output, containsString("mailer@127.0.0.1 1"));
         assertThat(output, containsString("arthur@earth.planet 1"));
 
         mon_in.addLine("servers"); // send "addresses" command to command line
