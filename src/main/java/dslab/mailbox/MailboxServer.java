@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -86,13 +87,17 @@ public class MailboxServer implements IMailboxServer, Runnable, BasicServer {
             Integer registryPort = this.config.getInt("registry.port");
             String rootNameserverId = this.config.getString("root_id");
 
-            //Get registry, from registry rootNS
-            Registry registry = LocateRegistry.getRegistry(registryHost, registryPort);
-            INameserverRemote rootNameserver = (INameserverRemote) registry.lookup(rootNameserverId);
+            try {
+                //Get registry, from registry rootNS
+                Registry registry = LocateRegistry.getRegistry(registryHost, registryPort);
+                INameserverRemote rootNameserver = (INameserverRemote) registry.lookup(rootNameserverId);
 
-            String add = this.dmtpServer.getLocalAddress();
-            //System.out.println(add);
-            rootNameserver.registerMailboxServer(this.config.getString("domain"), add);
+                String add = this.dmtpServer.getLocalAddress();
+                //System.out.println(add);
+                rootNameserver.registerMailboxServer(this.config.getString("domain"), add);
+            }catch(ConnectException e){
+                this.shell.out().printf("No Nameserver found!");
+            }
 
             this.shell.out().printf("%s> started!%n",this.name);
             this.shell.run();
