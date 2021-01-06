@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.rmi.ConnectException;
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -97,6 +98,10 @@ public class MailboxServer implements IMailboxServer, Runnable, BasicServer {
                 rootNameserver.registerMailboxServer(this.config.getString("domain"), add);
             }catch(ConnectException e){
                 this.shell.out().printf("No Nameserver found!");
+            }
+            catch(NoSuchObjectException e)
+            {
+                this.shell.out().printf("No root Nameserver RMI Object found!");
             }
 
             this.shell.out().printf("%s> started!%n",this.name);
