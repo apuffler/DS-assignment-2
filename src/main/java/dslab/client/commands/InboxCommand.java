@@ -30,12 +30,12 @@ public class InboxCommand implements Command{
         do{
             String line = this.con.readCon();
 
-            if(line.toUpperCase().contains("ERROR")){
+            if(line.toUpperCase().contains("ERROR") && !line.contains(("ERROR Domain not found"))){
                 this.con.console().println(line);
                 return;
             }
             if(line.toUpperCase().contains("NO MAILBOX FOUND!")){
-
+                this.con.console().printf("NO Messages!%n");
                 break;
             }
 
@@ -52,11 +52,19 @@ public class InboxCommand implements Command{
         }while(true);
         HashMap<Integer, Message> inbox = new HashMap<Integer, Message>();
         //Laden der einzelnen Mails
-        for( int id : ids){
-            Message msg= readMessage(id);
-            msg.setID(id);
-            printMessage(msg);
-            inbox.put(id,msg);
+        try {
+            for (int id : ids) {
+                Message msg = readMessage(id);
+                msg.setID(id);
+                printMessage(msg);
+                inbox.put(id, msg);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        if(inbox.size() == 0){
+            this.con.console().printf("NO Messages!%n");
         }
 
         this.manager.updateINBOX(inbox);
@@ -65,7 +73,7 @@ public class InboxCommand implements Command{
     private void printMessage(Message msg){
         String txt = "id: %s%nsender: %s%nrecipients: %s%nsubject: %s%ndata: %s%n%s%n";
         this.con.console().printf(txt,msg.getID(), msg.getFrom(), msg.getTo(), msg.getSubject(),msg.getData(),"#".repeat(100));
-        this.con.console().printf("HASH: %s%n",msg.getHash());
+        //this.con.console().printf("HASH: %s%n",msg.getHash());
     }
 
     private Message readMessage(int id){
@@ -76,7 +84,7 @@ public class InboxCommand implements Command{
         do{
             String line = this.con.readCon();
 
-            if(line.toUpperCase().contains("ERROR")){
+            if(line.toUpperCase().contains("ERROR") && !line.contains(("ERROR Domain not found"))){
                 this.con.console().println(line);
                 return null;
             }

@@ -78,14 +78,14 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
     @Override
     @Command
     public void inbox() {
-        this.shell.out().println("INBOX");
+        //this.shell.out().println("INBOX");
         new InboxCommand().execute(this.mailbox,this);
     }
 
     @Override
     @Command
     public void delete(String id) {
-        this.shell.out().println("Delete " + id);
+        //this.shell.out().println("Delete " + id);
         try {
             new DeleteCommand(Integer.parseInt(id)).execute(this.mailbox, this);
         }catch(NumberFormatException e){
@@ -96,7 +96,7 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
     @Override
     @Command
     public void verify(String id) {
-        this.shell.out().println("verify " + id );
+        //this.shell.out().println("verify " + id );
         try {
             new VerifyCommand(Integer.parseInt(id)).execute(this.mailbox, this);
         }catch(NumberFormatException e){
@@ -107,10 +107,10 @@ public class MessageClient implements IMessageClient, Runnable, INBOXManager {
     @Override
     @Command
     public void msg(String to, String subject, String data) {
-        this.shell.out().println("MSG");
-        this.shell.out().println(to);
-        this.shell.out().println(subject);
-        this.shell.out().println(data);
+        //this.shell.out().println("MSG");
+        //this.shell.out().println(to);
+        //this.shell.out().println(subject);
+        //this.shell.out().println(data);
         Message msg = new DMessage(this.config.getString("transfer.email"), to, subject, data,null);
 
         try {

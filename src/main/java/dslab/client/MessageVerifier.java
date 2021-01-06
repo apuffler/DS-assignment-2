@@ -42,8 +42,8 @@ public class MessageVerifier {
         byte[] recievedHash = Base64.getDecoder().decode(m.getHash());
         String msg = String.join("\n",m.getFrom(),m.getTo(),m.getSubject(),m.getData());
         byte[] computedHash = generateHash(msg);
-        System.out.println(new String(recievedHash));
-        System.out.println(new String(computedHash));
+        //System.out.println(new String(recievedHash));
+        //System.out.println(new String(computedHash));
         return MessageDigest.isEqual(computedHash,recievedHash);
     }
 }

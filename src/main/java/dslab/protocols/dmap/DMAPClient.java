@@ -164,6 +164,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
         }
         try {
             this.protocol.delete(this.username, msgid);
+            println("ok");
         } catch (ProtocolException e) {
             println("" + e.getMessage());
         }
@@ -176,7 +177,7 @@ public class DMAPClient extends TCPClient implements MessageAccessProtocol {
             return;
         }
         this.username = null;
-        printf("ok%n");
+        println("ok");
     }
 
     @Override
